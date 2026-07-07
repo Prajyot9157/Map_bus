@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="mr">
 <head>
@@ -14,7 +13,7 @@
             --primary: #2979ff;
             --primary-dark: #1565c0;
             --primary-light: #e3f2fd;
-            --surface: #1e1e24; /* Darker modern theme for extreme contrast */
+            --surface: #1e1e24; 
             --background: #121214;
             --green: #00e676;
             --green-light: rgba(0, 230, 118, 0.15);
@@ -61,7 +60,7 @@
         .header .title h1 { font-size: 1.2rem; font-weight: 800; color: #ffd600; }
         .header .title p { font-size: 0.8rem; color: var(--text-secondary); }
         
-        /* Shift Mode Switcher */
+        /* Shift Toggle */
         .shift-toggle {
             display: flex;
             background: #263238;
@@ -89,7 +88,7 @@
             box-shadow: var(--shadow);
         }
 
-        /* --- Summary Cards (High Contrast) --- */
+        /* --- Summary Cards --- */
         .summary-row {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -178,14 +177,14 @@
 
         .stops-list { padding: 0 16px; display: flex; flex-direction: column; gap: 14px; }
         
-        /* Card visual styles for driver readability */
+        /* Card Styles */
         .stop-card {
             background: var(--surface);
             border-radius: var(--radius);
             padding: 16px;
             box-shadow: var(--shadow);
             border: 2px solid var(--border);
-            border-left: 10px solid var(--orange); /* Clear thick color line */
+            border-left: 10px solid var(--orange); 
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -193,7 +192,7 @@
             transition: all 0.25s;
         }
         
-        /* NEXT/ACTIVE STOP Pulsing & Highlight */
+        /* NEXT ACTIVE STOP */
         .stop-card.active-next {
             border-left-color: #ffd600;
             border-top: 2px solid #ffd600;
@@ -217,7 +216,8 @@
         }
         
         .stop-info { flex: 1; display: flex; flex-direction: column; gap: 6px; }
-        .stop-name-row { display: flex; align-items: center; gap: 8px; }
+        .stop-name-row { display: flex; align-items: center; justify-content: space-between; width: 100%; margin-bottom: 2px; }
+        .stop-name-left { display: flex; align-items: center; gap: 8px; }
         .stop-badge {
             background: var(--border);
             color: #ffd600;
@@ -249,14 +249,13 @@
         }
         .stop-card.done .dist-badge { display: none; }
 
-        /* Actions: Big tap targets */
+        /* Large Driver Tap Targets */
         .stop-action-btns {
             display: flex;
             align-items: center;
             gap: 10px;
         }
         
-        /* Direct Big Call Button */
         .call-btn {
             width: 52px; height: 52px;
             border-radius: 50%;
@@ -270,7 +269,6 @@
         }
         .call-btn:active { background: #455a64; }
 
-        /* Direction button */
         .dir-btn {
             width: 52px; height: 52px;
             border-radius: 50%;
@@ -283,7 +281,6 @@
         }
         .dir-btn:active { background: var(--primary-dark); }
 
-        /* The Ultimate BIG TICK button */
         .tick-btn {
             width: 60px; height: 60px;
             border-radius: 50%;
@@ -305,16 +302,22 @@
             color: var(--green);
         }
 
-        /* Danger Delete Quick Button */
-        .del-btn-quick {
-            background: transparent;
-            border: none;
+        /* Beautiful Red Trash Button */
+        .del-field-btn {
+            background: rgba(255, 23, 68, 0.15);
+            border: 1px solid rgba(255, 23, 68, 0.4);
             color: #ff5252;
-            padding: 4px;
-            font-size: 1.1rem;
+            padding: 6px 10px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            font-weight: bold;
             cursor: pointer;
-            margin-left: 8px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s;
         }
+        .del-field-btn:active { background: #ff1744; color: white; }
 
         /* --- FAB Button --- */
         .fab {
@@ -331,10 +334,10 @@
         }
         .fab:active { transform: scale(0.9); }
 
-        /* --- Modal (Fixed overlap using z-index 99999) --- */
+        /* --- Modal --- */
         .modal-overlay {
             position: fixed; inset: 0; background: rgba(0,0,0,0.85);
-            z-index: 99999; /* Higher than map, overlay, etc. */
+            z-index: 99999; 
             display: none; align-items: flex-end; justify-content: center;
         }
         .modal-sheet {
@@ -391,7 +394,7 @@
             </div>
         </div>
         
-        <!-- Morning / Afternoon Shift Switcher -->
+        <!-- Morning / Afternoon Shift Toggle -->
         <div class="shift-toggle">
             <button class="shift-btn active" id="btnMorning" onclick="setShift('morning')">
                 ☀️ सकाळ
@@ -402,7 +405,7 @@
         </div>
     </header>
 
-    <!-- Summary (High Contrast Displays) -->
+    <!-- Summary Display -->
     <div class="summary-row">
         <div class="summary-card total">
             <div class="value" id="countTotal">0</div>
@@ -437,15 +440,15 @@
         <button class="reset-btn-manual" onclick="confirmManualReset()">🔄 रीसेट करा</button>
     </div>
     
-    <!-- Stops List Container -->
+    <!-- Stops List -->
     <div class="stops-list" id="stopsList">
-        <!-- Javascript द्वारे थांबे येथे दिसतील -->
+        <!-- JS Driven Content -->
     </div>
 
     <!-- Add Stop Button (FAB) -->
     <button class="fab" onclick="openModal()" title="नवीन थांबा जोडा">+</button>
 
-    <!-- Add Stop Modal Overlay -->
+    <!-- Add Stop Modal -->
     <div class="modal-overlay" id="addModal">
         <div class="modal-sheet">
             <h2 class="modal-title">नवीन थांबा जोडा 📍</h2>
@@ -471,7 +474,7 @@
             </div>
 
             <div class="modal-actions">
-                <button type="button" class="btn-cancel" onclick="closeModal()">मागे व्हा</button>
+                <button type="button" class="btn-cancel" onclick="closeModal()">मागे होई</button>
                 <button type="button" class="btn-save" onclick="saveNewStop()">✅ थांबा सेव्ह करा</button>
             </div>
         </div>
@@ -484,66 +487,58 @@
         // --- State Management ---
         const STATE = {
             stops: [],
-            driverPos: null,      // Driver's active GPS coordinate
-            tempCoords: null,     // Holds coordinate when adding/marking new stops
-            currentShift: 'morning', // morning (pickup) or afternoon (drop-off)
+            driverPos: null,      
+            tempCoords: null,     
+            currentShift: 'morning', 
             map: null,
             markerLayer: null,
             driverMarker: null,
             routeLine: null
         };
 
-        // --- Init & Auto Daily Reset Logic ---
+        // --- Init & Auto Daily Reset ---
         function initApp() {
-            // Load saved stops
             const saved = localStorage.getItem('schoolBusStopsData');
             if (saved) {
-                STATE.stops = JSON.parse(saved);
+                try {
+                    STATE.stops = JSON.parse(saved);
+                } catch (e) {
+                    STATE.stops = [];
+                }
             }
 
-            // Set Shift Mode
             const savedShift = localStorage.getItem('schoolBusShift');
             if (savedShift) {
                 STATE.currentShift = savedShift;
                 setShiftUI(savedShift);
             }
 
-            // Set Current Date & Check for Daily Reset
             const now = new Date();
             const dateStr = now.toLocaleDateString('mr-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
             document.getElementById('liveDate').textContent = dateStr;
 
             checkDailyReset();
-
-            // Setup Leaflet Map
             initMap();
-            
-            // Start GPS Watcher
             startGPS();
-
-            // Draw everything
             updateUI();
         }
 
-        // AUTO RESET: If next day, reset all stops' completed status to 'pending'
+        // Auto Midnight Reset
         function checkDailyReset() {
-            const todayKey = new Date().toDateString(); // e.g. "Tue Jul 07 2026"
+            const todayKey = new Date().toDateString(); 
             const lastSavedDate = localStorage.getItem('lastOpenedDate');
 
             if (lastSavedDate && lastSavedDate !== todayKey) {
-                // Change of day detected! Reset all stop statuses
                 STATE.stops.forEach(stop => {
                     stop.status = 'pending';
                 });
-                localStorage.setItem('schoolBusStopsData', JSON.stringify(STATE.stops));
+                saveData();
                 showToast("🌅 शुभ सकाळ! आजचे सर्व थांबे आपोआप रीसेट झाले आहेत.");
             }
-            
-            // Save today's date as last opened
             localStorage.setItem('lastOpenedDate', todayKey);
         }
 
-        // Manual Force Reset
+        // Manual Clear/Reset
         function confirmManualReset() {
             if (confirm("तुम्हाला आजचे सर्व थांबे पुन्हा सुरूवातीपासून (Pending) करायचे आहेत का?")) {
                 STATE.stops.forEach(stop => {
@@ -555,7 +550,7 @@
             }
         }
 
-        // Shift Toggle (Sakal / Dupar)
+        // Shift Configuration Switch
         function setShift(shiftMode) {
             STATE.currentShift = shiftMode;
             localStorage.setItem('schoolBusShift', shiftMode);
@@ -582,7 +577,6 @@
 
         // --- Map Logic ---
         function initMap() {
-            // Default center Pimpri/Pune area if GPS not loaded yet
             STATE.map = L.map('map', { zoomControl: false, attributionControl: false }).setView([18.6279, 73.8009], 13);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(STATE.map);
             STATE.markerLayer = L.layerGroup().addTo(STATE.map);
@@ -591,32 +585,29 @@
         function updateMapElements() {
             if (!STATE.map) return;
             STATE.markerLayer.clearLayers();
-            if (STATE.routeLine) STATE.map.removeLayer(STATE.routeLine);
+            if (STATE.routeLine) {
+                STATE.map.removeLayer(STATE.routeLine);
+                STATE.routeLine = null;
+            }
 
             const points = [];
 
-            // Add Driver (Bus) Marker
             if (STATE.driverPos) {
                 points.push([STATE.driverPos.lat, STATE.driverPos.lng]);
-                
-                // Pulsing outer blue radius
                 L.circle([STATE.driverPos.lat, STATE.driverPos.lng], {
                     radius: 30, color: '#2979ff', fillColor: '#2979ff', fillOpacity: 0.2, weight: 1
                 }).addTo(STATE.markerLayer);
 
                 STATE.driverMarker = L.circleMarker([STATE.driverPos.lat, STATE.driverPos.lng], {
                     radius: 9, color: 'white', weight: 3, fillColor: '#2979ff', fillOpacity: 1
-                }).addTo(STATE.markerLayer).bindPopup("<b>🚌 तुमची बस इथे आहे</b>");
+                }).addTo(STATE.markerLayer);
             }
 
-            // Determine rendering order based on morning/afternoon shift direction
             const displayStops = [...STATE.stops];
             if (STATE.currentShift === 'afternoon') {
-                // Afternoon route is reversed (school to home drop-off)
                 displayStops.reverse();
             }
 
-            // Plot stops
             displayStops.forEach((stop, i) => {
                 const isDone = stop.status === 'completed';
                 const color = isDone ? '#9aa0a6' : (i === getNextPendingIndex(displayStops) ? '#ffd600' : '#ff9100');
@@ -633,7 +624,6 @@
                 }
             });
 
-            // Draw route polyline matching driver's trip schedule
             if (points.length > 1) {
                 STATE.routeLine = L.polyline(points, { color: '#ffd600', weight: 5, dashArray: '8, 8', opacity: 0.8 }).addTo(STATE.map);
             }
@@ -659,7 +649,7 @@
             if(bounds.length > 0) STATE.map.fitBounds(bounds, { padding: [40, 40] });
         }
 
-        // --- GPS Tracker Logic ---
+        // --- GPS Watcher ---
         function startGPS() {
             const ind = document.getElementById('gpsIndicator');
             const txt = document.getElementById('gpsText');
@@ -679,16 +669,16 @@
                 },
                 (err) => {
                     ind.className = 'dot';
-                    txt.textContent = "GPS बंद आहे! कृपया Location चालू करा 🔴";
-                    console.error(err);
+                    let errorMsg = "GPS बंद आहे! कृपया Location चालू करा 🔴";
+                    if (err.code === 1) errorMsg = "GPS परमिशन नाकारली! Location चालू करा 🔴";
+                    txt.textContent = errorMsg;
                 },
                 { enableHighAccuracy: true, maximumAge: 3000, timeout: 15000 }
             );
         }
 
-        // Haversine Distance (m / km)
         function calcDist(lat1, lon1, lat2, lon2) {
-            const R = 6371; // km
+            const R = 6371; 
             const dLat = (lat2 - lat1) * Math.PI / 180;
             const dLon = (lon2 - lon1) * Math.PI / 180;
             const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
@@ -698,7 +688,7 @@
             return d < 1 ? Math.round(d * 1000) + ' मी' : d.toFixed(1) + ' किमी';
         }
 
-        // --- High Contrast Driver UI Rendering ---
+        // --- Driver UI Rendering ---
         function updateUI() {
             const total = STATE.stops.length;
             const done = STATE.stops.filter(s => s.status === 'completed').length;
@@ -721,18 +711,16 @@
                 return;
             }
 
-            // Create display sequence based on Morning vs Afternoon (reversed drop-off)
             const displayStops = [...STATE.stops];
             if (STATE.currentShift === 'afternoon') {
                 displayStops.reverse();
             }
 
-            // Find first pending index to highlight
             const nextPendingIndex = getNextPendingIndex(displayStops);
 
             displayStops.forEach((stop, index) => {
                 const isDone = stop.status === 'completed';
-                const isNext = (index === nextPendingIndex); // Highlight Active Destination
+                const isNext = (index === nextPendingIndex); 
                 
                 const distStr = (STATE.driverPos && !isDone) ? 
                     calcDist(STATE.driverPos.lat, STATE.driverPos.lng, stop.coords.lat, stop.coords.lng) : '--';
@@ -740,33 +728,37 @@
                 const card = document.createElement('div');
                 card.className = `stop-card ${isDone ? 'done' : ''} ${isNext ? 'active-next' : ''}`;
                 
-                // Determine direction marker icon
                 const travelIcon = STATE.currentShift === 'morning' ? '🏠 ➔ 🏫' : '🏫 ➔ 🏠';
 
-                // Large action layout
+                // Core Action Setup
                 let actionBtnHTML = '';
                 if (!isDone) {
                     actionBtnHTML = `
                         <div class="stop-action-btns">
                             ${stop.phone ? `<a href="tel:${stop.phone}" class="call-btn" title="फोन लावा">📞</a>` : ''}
-                            <button class="dir-btn" onclick="openNavMap(${stop.coords.lat}, ${stop.coords.lng})" title="नकाशा मार्ग">🧭</button>
-                            <button class="tick-btn" onclick="markDone('${stop.id}')" title="पूर्ण झाले">✔</button>
+                            <button class="dir-btn" onclick="openNavMap(${stop.coords.lat}, ${stop.coords.lng})" title="मार्ग">🧭</button>
+                            <button class="tick-btn" onclick="markDone('${stop.id}')" title="झाले">✔</button>
                         </div>
                     `;
                 } else {
                     actionBtnHTML = `
                         <div class="stop-action-btns">
                             <div class="already-done-check">✔</div>
-                            <button class="del-btn-quick" onclick="deleteStop('${stop.id}')" title="डिलीट">🗑️</button>
                         </div>
                     `;
                 }
 
                 card.innerHTML = `
                     <div class="stop-info">
+                        <!-- Top field row with name and a safe explicit delete field button -->
                         <div class="stop-name-row">
-                            <div class="stop-badge">${index + 1}</div>
-                            <div class="stop-name">${stop.name}</div>
+                            <div class="stop-name-left">
+                                <div class="stop-badge">${index + 1}</div>
+                                <div class="stop-name">${stop.name}</div>
+                            </div>
+                            <button class="del-field-btn" onclick="deleteStop('${stop.id}')" title="थांबा काढून टाका">
+                                🗑️ काढा
+                            </button>
                         </div>
                         <div class="stop-details">
                             <span class="dist-badge class-dist" data-lat="${stop.coords.lat}" data-lng="${stop.coords.lng}">
@@ -785,7 +777,6 @@
             updateMapElements();
         }
 
-        // Lightweight live GPS updates for distances to save battery & processing
         function updateListDistances() {
             if (!STATE.driverPos) return;
             document.querySelectorAll('.class-dist').forEach(el => {
@@ -795,9 +786,8 @@
             });
         }
 
-        // --- Stop Operations ---
+        // --- Operations ---
         function openNavMap(lat, lng) {
-            // High reliability redirect to native system navigation mapping tools
             window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving`, '_blank');
         }
 
@@ -811,18 +801,19 @@
             }
         }
 
+        // Handler for the Deleting Field Button
         function deleteStop(id) {
             const stop = STATE.stops.find(s => s.id === id);
             const stopName = stop ? stop.name : "हा थांबा";
-            if (confirm(`तुम्हाला नक्की '${stopName}' या विद्यार्थ्याचा मार्ग हटवायचा आहे का?`)) {
+            if (confirm(`तुम्हाला नक्की '${stopName}' या विद्यार्थ्याचा थांबा पूर्णपणे काढून टाकायचा आहे का?`)) {
                 STATE.stops = STATE.stops.filter(s => s.id !== id);
                 saveData();
                 updateUI();
-                showToast("थांबा यशस्वीरित्या डिलीट केला.");
+                showToast("थांबा यशस्वीरित्या काढून टाकला.");
             }
         }
 
-        // --- Modal Control Flow ---
+        // --- Modals ---
         function openModal() {
             document.getElementById('stopNameInput').value = '';
             document.getElementById('stopPhoneInput').value = '';
@@ -839,17 +830,14 @@
             document.getElementById('addModal').style.display = 'none';
         }
 
-        // GEOLOCATION ACTION: Save the exact spot where driver currently stands
         function fetchAndSaveTempLocation() {
             if (!STATE.driverPos) {
                 showToast('थांबा! अजून जीपीएस लोकेशन मिळाले नाही.');
                 return;
             }
             
-            // Lock location data in state
             STATE.tempCoords = { ...STATE.driverPos };
             
-            // Visual confirmation inside modal
             const btn = document.getElementById('btnFetchLocation');
             btn.className = 'fetch-btn success';
             btn.innerHTML = '✅ जागा यशस्वीरित्या सेट झाली!';
@@ -870,12 +858,15 @@
                 return;
             }
 
+            // Create unique robust ID
+            const uniqueId = Date.now().toString() + Math.random().toString(36).substring(2, 9);
+
             const newStop = {
-                id: Date.now().toString(),
+                id: uniqueId,
                 name: name,
                 phone: phone,
                 coords: STATE.tempCoords,
-                status: 'pending' // pending, completed
+                status: 'pending'
             };
 
             STATE.stops.push(newStop);
@@ -886,7 +877,6 @@
             showToast('नवीन थांबा यशस्वीरित्या जोडला गेला!');
         }
 
-        // --- Local Storage Utils ---
         function saveData() {
             localStorage.setItem('schoolBusStopsData', JSON.stringify(STATE.stops));
         }
@@ -903,9 +893,7 @@
             setTimeout(() => { if (t.parentElement) t.remove(); }, 2800);
         }
 
-        // Document Load Initializer
         document.addEventListener('DOMContentLoaded', initApp);
-
     </script>
 </body>
 </html>
