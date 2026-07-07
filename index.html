@@ -1,83 +1,112 @@
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="mr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Bus Route Tracker</title>
+    <title>मराठी बस ट्रॅकर</title>
 
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     
     <style>
         :root {
-            --primary: #1a73e8;
-            --primary-dark: #1557b0;
-            --primary-light: #e8f0fe;
-            --surface: #ffffff;
-            --background: #f8f9fa;
-            --green: #0f9d58;
-            --green-light: #e6f4ea;
-            --orange: #f4b400;
-            --red: #db4437;
-            --grey: #9aa0a6;
-            --grey-light: #f1f3f4;
-            --text: #202124;
-            --text-secondary: #5f6368;
-            --border: #dadce0;
-            --shadow: 0 2px 8px rgba(0,0,0,0.1);
-            --shadow-lg: 0 8px 24px rgba(0,0,0,0.15);
-            --radius: 16px;
-            --radius-sm: 10px;
-            --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            --primary: #2979ff;
+            --primary-dark: #1565c0;
+            --primary-light: #e3f2fd;
+            --surface: #1e1e24; /* Darker modern theme for extreme contrast */
+            --background: #121214;
+            --green: #00e676;
+            --green-light: rgba(0, 230, 118, 0.15);
+            --orange: #ff9100;
+            --orange-light: rgba(255, 145, 0, 0.15);
+            --red: #ff1744;
+            --grey: #b0bec5;
+            --text: #ffffff;
+            --text-secondary: #cfd8dc;
+            --border: #37474f;
+            --shadow: 0 4px 12px rgba(0,0,0,0.3);
+            --shadow-lg: 0 12px 36px rgba(0,0,0,0.5);
+            --radius: 20px;
+            --radius-sm: 12px;
             --safe-bottom: env(safe-area-inset-bottom, 16px);
         }
         
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        html { font-size: 15px; -webkit-tap-highlight-color: transparent; }
+        html { font-size: 16px; -webkit-tap-highlight-color: transparent; }
         
         body {
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: var(--background);
             color: var(--text);
             min-height: 100vh;
-            padding-bottom: calc(var(--safe-bottom) + 80px);
+            padding-bottom: calc(var(--safe-bottom) + 100px);
         }
 
         /* --- Header --- */
         .header {
             background: var(--surface);
-            padding: 12px 16px;
+            padding: 14px 16px;
             position: sticky;
             top: 0;
             z-index: 100;
-            border-bottom: 1px solid var(--border);
+            border-bottom: 2px solid var(--border);
             display: flex;
             align-items: center;
-            gap: 12px;
+            justify-content: space-between;
             box-shadow: var(--shadow);
         }
-        .header .logo { font-size: 24px; }
-        .header .title { flex: 1; }
-        .header .title h1 { font-size: 1.1rem; color: var(--primary); }
-        .header .title p { font-size: 0.75rem; color: var(--text-secondary); }
+        .header .logo-area { display: flex; align-items: center; gap: 10px; }
+        .header .logo { font-size: 28px; }
+        .header .title h1 { font-size: 1.2rem; font-weight: 800; color: #ffd600; }
+        .header .title p { font-size: 0.8rem; color: var(--text-secondary); }
+        
+        /* Shift Mode Switcher */
+        .shift-toggle {
+            display: flex;
+            background: #263238;
+            border-radius: 30px;
+            padding: 4px;
+            border: 1px solid var(--border);
+        }
+        .shift-btn {
+            padding: 6px 12px;
+            border-radius: 20px;
+            border: none;
+            background: transparent;
+            color: var(--grey);
+            font-size: 0.8rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s;
+        }
+        .shift-btn.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: var(--shadow);
+        }
 
-        /* --- Summary Cards --- */
+        /* --- Summary Cards (High Contrast) --- */
         .summary-row {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            padding: 15px 16px;
+            gap: 12px;
+            padding: 16px;
         }
         .summary-card {
             background: var(--surface);
             border-radius: var(--radius-sm);
-            padding: 12px;
+            padding: 12px 8px;
             text-align: center;
             box-shadow: var(--shadow);
+            border: 2px solid var(--border);
         }
-        .summary-card .value { font-size: 1.8rem; font-weight: 700; color: var(--text); }
-        .summary-card .label { font-size: 0.75rem; color: var(--text-secondary); font-weight: 600; margin-top: 4px; }
+        .summary-card .value { font-size: 2.2rem; font-weight: 900; line-height: 1; }
+        .summary-card .label { font-size: 0.75rem; color: var(--text-secondary); font-weight: bold; margin-top: 6px; }
+        .summary-card.total .value { color: #ffd600; }
         .summary-card.done .value { color: var(--green); }
         .summary-card.left .value { color: var(--orange); }
 
@@ -87,157 +116,305 @@
             border-radius: var(--radius);
             overflow: hidden;
             box-shadow: var(--shadow-lg);
-            height: 40vh;
-            min-height: 250px;
+            height: 35vh;
+            min-height: 240px;
             position: relative;
-            border: 2px solid var(--border);
+            border: 3px solid var(--border);
         }
-        #map { width: 100%; height: 100%; z-index: 1; /* Map base index */ }
+        #map { width: 100%; height: 100%; z-index: 1; }
         
         .map-overlay-btns {
             position: absolute;
-            top: 10px; right: 10px;
-            z-index: 10; /* Upar rakha hai map se */
-            display: flex; flex-direction: column; gap: 8px;
+            top: 12px; right: 12px;
+            z-index: 10;
+            display: flex; flex-direction: column; gap: 10px;
         }
         .map-btn {
-            width: 40px; height: 40px;
+            width: 46px; height: 46px;
             border-radius: 50%;
             background: var(--surface);
-            border: none;
+            border: 2px solid var(--border);
             box-shadow: var(--shadow);
-            font-size: 1.2rem;
+            font-size: 1.4rem;
             display: flex; align-items: center; justify-content: center;
             cursor: pointer;
+            color: white;
         }
-        .map-btn:active { transform: scale(0.95); background: var(--grey-light); }
+        .map-btn:active { transform: scale(0.9); background: #263238; }
         
         .gps-status {
             position: absolute;
-            bottom: 10px; left: 10px; right: 10px;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 8px; padding: 8px 12px;
-            font-size: 0.8rem; font-weight: 600;
+            bottom: 12px; left: 12px; right: 12px;
+            background: rgba(30, 30, 36, 0.95);
+            border-radius: 12px; padding: 10px 14px;
+            font-size: 0.85rem; font-weight: bold;
             box-shadow: var(--shadow);
             z-index: 10;
-            display: flex; align-items: center; gap: 8px;
+            display: flex; align-items: center; gap: 10px;
+            border: 1px solid var(--border);
         }
-        .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--grey); }
-        .dot.active { background: var(--primary); animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(26,115,232,0.4); } 70% { box-shadow: 0 0 0 8px rgba(26,115,232,0); } 100% { box-shadow: 0 0 0 0 rgba(26,115,232,0); } }
+        .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--grey); }
+        .dot.active { background: var(--green); animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(0,230,118,0.5); } 70% { box-shadow: 0 0 0 10px rgba(0,230,118,0); } 100% { box-shadow: 0 0 0 0 rgba(0,230,118,0); } }
 
         /* --- Stops List --- */
-        .list-header { padding: 0 16px 10px; font-weight: bold; font-size: 1.1rem; color: var(--text); }
-        .stops-list { padding: 0 16px; display: flex; flex-direction: column; gap: 12px; }
+        .list-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 16px 10px;
+        }
+        .list-header { font-weight: 800; font-size: 1.2rem; color: #ffd600; }
+        .reset-btn-manual {
+            background: #263238;
+            color: #ff5252;
+            border: 1px solid #ff5252;
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .stops-list { padding: 0 16px; display: flex; flex-direction: column; gap: 14px; }
         
+        /* Card visual styles for driver readability */
         .stop-card {
             background: var(--surface);
-            border-radius: var(--radius-sm);
+            border-radius: var(--radius);
             padding: 16px;
             box-shadow: var(--shadow);
-            border-left: 5px solid var(--orange);
-            display: flex; flex-direction: column; gap: 8px;
+            border: 2px solid var(--border);
+            border-left: 10px solid var(--orange); /* Clear thick color line */
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            transition: all 0.25s;
         }
-        .stop-card.done { border-left-color: var(--green); background: var(--green-light); opacity: 0.8; }
         
-        .stop-card-top { display: flex; justify-content: space-between; align-items: center; }
-        .stop-name { font-size: 1.1rem; font-weight: bold; }
-        .stop-dist { font-size: 0.85rem; color: var(--text-secondary); background: var(--grey-light); padding: 4px 8px; border-radius: 12px; }
-        
-        .stop-actions { display: flex; gap: 10px; margin-top: 5px; }
-        .btn {
-            padding: 10px 16px; border-radius: 20px; font-weight: 600;
-            border: none; cursor: pointer; flex: 1; text-align: center;
-            transition: transform 0.1s;
+        /* NEXT/ACTIVE STOP Pulsing & Highlight */
+        .stop-card.active-next {
+            border-left-color: #ffd600;
+            border-top: 2px solid #ffd600;
+            border-right: 2px solid #ffd600;
+            border-bottom: 2px solid #ffd600;
+            background: #263238;
+            animation: cardPulse 3s infinite alternate;
         }
-        .btn:active { transform: scale(0.96); }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-green { background: var(--green); color: white; }
-        .btn-danger { background: #ffebee; color: var(--red); flex: 0.3; }
+        @keyframes cardPulse {
+            0% { box-shadow: 0 4px 12px rgba(255, 214, 0, 0.1); }
+            100% { box-shadow: 0 4px 20px rgba(255, 214, 0, 0.3); }
+        }
+
+        .stop-card.done {
+            border-left-color: var(--green);
+            background: var(--green-light);
+            border-top: 1px solid rgba(0, 230, 118, 0.3);
+            border-right: 1px solid rgba(0, 230, 118, 0.3);
+            border-bottom: 1px solid rgba(0, 230, 118, 0.3);
+            opacity: 0.65;
+        }
+        
+        .stop-info { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+        .stop-name-row { display: flex; align-items: center; gap: 8px; }
+        .stop-badge {
+            background: var(--border);
+            color: #ffd600;
+            width: 28px; height: 28px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 900;
+            font-size: 0.9rem;
+        }
+        .stop-card.done .stop-badge { background: var(--green); color: black; }
+        
+        .stop-name { font-size: 1.3rem; font-weight: 800; color: white; }
+        .stop-card.done .stop-name { text-decoration: line-through; color: var(--grey); }
+        
+        .stop-details {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .dist-badge {
+            background: rgba(41, 121, 255, 0.2);
+            color: #82b1ff;
+            padding: 3px 8px;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+        .stop-card.done .dist-badge { display: none; }
+
+        /* Actions: Big tap targets */
+        .stop-action-btns {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        /* Direct Big Call Button */
+        .call-btn {
+            width: 52px; height: 52px;
+            border-radius: 50%;
+            background: #37474f;
+            border: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.4rem;
+            color: #81d4fa;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .call-btn:active { background: #455a64; }
+
+        /* Direction button */
+        .dir-btn {
+            width: 52px; height: 52px;
+            border-radius: 50%;
+            background: var(--primary);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.4rem;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .dir-btn:active { background: var(--primary-dark); }
+
+        /* The Ultimate BIG TICK button */
+        .tick-btn {
+            width: 60px; height: 60px;
+            border-radius: 50%;
+            background: var(--green);
+            color: black;
+            font-size: 1.8rem;
+            font-weight: 900;
+            border: none;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 10px rgba(0, 230, 118, 0.4);
+        }
+        .tick-btn:active { transform: scale(0.9); }
+        
+        .already-done-check {
+            width: 50px; height: 50px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2.2rem;
+            color: var(--green);
+        }
+
+        /* Danger Delete Quick Button */
+        .del-btn-quick {
+            background: transparent;
+            border: none;
+            color: #ff5252;
+            padding: 4px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            margin-left: 8px;
+        }
 
         /* --- FAB Button --- */
         .fab {
             position: fixed;
             bottom: calc(var(--safe-bottom) + 20px);
             right: 20px;
-            width: 60px; height: 60px;
+            width: 65px; height: 65px;
             border-radius: 50%;
-            background: var(--primary);
-            color: white; font-size: 2rem;
-            border: none; box-shadow: 0 4px 12px rgba(26,115,232,0.4);
+            background: #ffd600;
+            color: black; font-size: 2.5rem; font-weight: bold;
+            border: none; box-shadow: 0 6px 18px rgba(255,214,0,0.4);
             z-index: 500; cursor: pointer;
             display: flex; align-items: center; justify-content: center;
         }
+        .fab:active { transform: scale(0.9); }
 
-        /* --- Modal (Z-index 9999 to fix map overlap) --- */
+        /* --- Modal (Fixed overlap using z-index 99999) --- */
         .modal-overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.6);
-            z-index: 9999; /* Sabse upar rahega, leaflet map iske peeche hoga */
+            position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+            z-index: 99999; /* Higher than map, overlay, etc. */
             display: none; align-items: flex-end; justify-content: center;
         }
         .modal-sheet {
             background: var(--surface); width: 100%; max-width: 600px;
-            border-radius: 24px 24px 0 0; padding: 24px 20px calc(var(--safe-bottom) + 24px);
+            border-radius: 30px 30px 0 0; padding: 24px 20px calc(var(--safe-bottom) + 24px);
             animation: slideUp 0.3s ease-out forwards;
+            border-top: 4px solid var(--primary);
         }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
         
-        .modal-title { font-size: 1.3rem; margin-bottom: 16px; color: var(--primary-dark); }
-        .form-group { margin-bottom: 16px; }
-        .form-group label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; }
+        .modal-title { font-size: 1.4rem; margin-bottom: 20px; color: #ffd600; font-weight: 800; text-align: center;}
+        .form-group { margin-bottom: 18px; }
+        .form-group label { display: block; font-size: 0.9rem; font-weight: bold; color: var(--text-secondary); margin-bottom: 8px; }
         .form-input {
-            width: 100%; padding: 12px 16px; border-radius: 12px;
-            border: 2px solid var(--border); font-size: 1rem; outline: none;
+            width: 100%; padding: 14px 16px; border-radius: 14px;
+            border: 2px solid var(--border); font-size: 1.1rem; outline: none;
+            background: #263238; color: white;
         }
         .form-input:focus { border-color: var(--primary); }
         
         .fetch-btn {
-            width: 100%; padding: 16px; border-radius: 12px;
-            background: #e8f0fe; color: var(--primary-dark); border: 2px dashed var(--primary);
-            font-size: 1rem; font-weight: bold; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; gap: 8px;
+            width: 100%; padding: 16px; border-radius: 14px;
+            background: rgba(41, 121, 255, 0.15); color: #82b1ff; border: 2px dashed var(--primary);
+            font-size: 1.1rem; font-weight: bold; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
         }
         .fetch-btn.success { background: var(--green-light); border-color: var(--green); color: var(--green); }
         
-        .modal-actions { display: flex; gap: 12px; margin-top: 24px; }
-        .btn-cancel { background: var(--grey-light); color: var(--text); flex: 1; padding: 14px; border-radius: 12px; border: none; font-weight: bold; }
-        .btn-save { background: var(--primary); color: white; flex: 2; padding: 14px; border-radius: 12px; border: none; font-weight: bold; }
+        .modal-actions { display: flex; gap: 14px; margin-top: 28px; }
+        .btn-cancel { background: #37474f; color: white; flex: 1; padding: 16px; border-radius: 14px; border: none; font-weight: bold; font-size: 1.1rem; cursor: pointer; }
+        .btn-save { background: var(--primary); color: white; flex: 2; padding: 16px; border-radius: 14px; border: none; font-weight: bold; font-size: 1.1rem; cursor: pointer; }
 
         /* --- Toast --- */
         .toast {
-            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
-            background: #323232; color: white; padding: 12px 24px;
-            border-radius: 30px; font-size: 0.9rem; z-index: 10000;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            animation: fadeInOut 2.5s forwards; pointer-events: none;
+            position: fixed; top: 24px; left: 50%; transform: translateX(-50%);
+            background: #ffd600; color: black; padding: 14px 28px;
+            border-radius: 30px; font-size: 1rem; z-index: 100000;
+            font-weight: 800; box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+            animation: fadeInOut 2.8s forwards; pointer-events: none;
+            display: flex; align-items: center; gap: 8px;
         }
-        @keyframes fadeInOut { 0% { opacity:0; top:0; } 15% { opacity:1; top:20px; } 85% { opacity:1; top:20px; } 100% { opacity:0; top:0; } }
+        @keyframes fadeInOut { 0% { opacity:0; top:0; } 15% { opacity:1; top:24px; } 85% { opacity:1; top:24px; } 100% { opacity:0; top:0; } }
     </style>
 </head>
 <body>
 
     <!-- Header -->
     <header class="header">
-        <div class="logo">🚌</div>
-        <div class="title">
-            <h1>Route Tracker</h1>
-            <p id="liveDate">Aaj ki Date</p>
+        <div class="logo-area">
+            <div class="logo">🏫</div>
+            <div class="title">
+                <h1>स्कूल बस ट्रॅकर</h1>
+                <p id="liveDate">दिनांक लोड होत आहे...</p>
+            </div>
+        </div>
+        
+        <!-- Morning / Afternoon Shift Switcher -->
+        <div class="shift-toggle">
+            <button class="shift-btn active" id="btnMorning" onclick="setShift('morning')">
+                ☀️ सकाळ
+            </button>
+            <button class="shift-btn" id="btnAfternoon" onclick="setShift('afternoon')">
+                🌙 दुपार
+            </button>
         </div>
     </header>
 
-    <!-- Summary -->
+    <!-- Summary (High Contrast Displays) -->
     <div class="summary-row">
-        <div class="summary-card">
+        <div class="summary-card total">
             <div class="value" id="countTotal">0</div>
-            <div class="label">KUL STOPS</div>
+            <div class="label">एकूण थांबे</div>
         </div>
         <div class="summary-card done">
             <div class="value" id="countDone">0</div>
-            <div class="label">HO GAYE</div>
+            <div class="label">पूर्ण झाले</div>
         </div>
         <div class="summary-card left">
             <div class="value" id="countLeft">0</div>
-            <div class="label">BAAKI HAI</div>
+            <div class="label">उरलेले</div>
         </div>
     </div>
 
@@ -245,45 +422,57 @@
     <div class="map-container">
         <div id="map"></div>
         <div class="map-overlay-btns">
-            <button class="map-btn" onclick="recenterMap()">📍</button>
-            <button class="map-btn" onclick="zoomToAll()">🔍</button>
+            <button class="map-btn" onclick="recenterMap()" title="माझी जागा">📍</button>
+            <button class="map-btn" onclick="zoomToAll()" title="पूर्ण मार्ग">🔍</button>
         </div>
         <div class="gps-status">
             <div class="dot" id="gpsIndicator"></div>
-            <span id="gpsText">GPS dhundh raha hai...</span>
+            <span id="gpsText">जीपीएस (GPS) शोधत आहे...</span>
         </div>
     </div>
 
-    <!-- Stops List -->
-    <div class="list-header">Aapke Stops:</div>
+    <!-- Stops List Header -->
+    <div class="list-header-row">
+        <div class="list-header" id="listTitleLabel">सकाळचे थांबे (घरून शाळा):</div>
+        <button class="reset-btn-manual" onclick="confirmManualReset()">🔄 रीसेट करा</button>
+    </div>
+    
+    <!-- Stops List Container -->
     <div class="stops-list" id="stopsList">
-        <!-- JS se populate hoga -->
+        <!-- Javascript द्वारे थांबे येथे दिसतील -->
     </div>
 
-    <!-- Naya Stop Add Karne Ka Button -->
-    <button class="fab" onclick="openModal()">+</button>
+    <!-- Add Stop Button (FAB) -->
+    <button class="fab" onclick="openModal()" title="नवीन थांबा जोडा">+</button>
 
-    <!-- Add Stop Modal (Z-Index Fixed) -->
+    <!-- Add Stop Modal Overlay -->
     <div class="modal-overlay" id="addModal">
         <div class="modal-sheet">
-            <h2 class="modal-title">Naya Stop Jode</h2>
+            <h2 class="modal-title">नवीन थांबा जोडा 📍</h2>
             
             <div class="form-group">
-                <label>Stop Ka Naam (Jaise: Rahul, Office, Pimpri)</label>
-                <input type="text" id="stopNameInput" class="form-input" placeholder="Naam likhe...">
+                <label>विद्यार्थ्यांचे / थांब्याचे नाव लिहा *</label>
+                <input type="text" id="stopNameInput" class="form-input" placeholder="उदा. राहुल शिंदे, पिंपरी" required>
             </div>
 
-            <!-- Yahi sabse zaruri button hai, location fetch karne ke liye -->
             <div class="form-group">
-                <label>Location Save Kare</label>
+                <label>पालकांचा मोबाईल नंबर (ऐच्छिक)</label>
+                <input type="tel" id="stopPhoneInput" class="form-input" placeholder="उदा. 98XXXXXXXX">
+            </div>
+
+            <div class="form-group">
+                <label>थांब्याची जागा (Location) सेट करा</label>
+                <p style="font-size: 0.8rem; color: var(--grey); margin-bottom: 8px;">
+                    * टीप: या थांब्याच्या ठिकाणी उभे राहून खालील बटण दाबा.
+                </p>
                 <button type="button" id="btnFetchLocation" class="fetch-btn" onclick="fetchAndSaveTempLocation()">
-                    📍 Meri Current Location Lo
+                    📍 माझी चालू जागा इथेच सेट करा
                 </button>
             </div>
 
             <div class="modal-actions">
-                <button type="button" class="btn-cancel" onclick="closeModal()">Cancel</button>
-                <button type="button" class="btn-save" onclick="saveNewStop()">✅ Save Stop</button>
+                <button type="button" class="btn-cancel" onclick="closeModal()">मागे व्हा</button>
+                <button type="button" class="btn-save" onclick="saveNewStop()">✅ थांबा सेव्ह करा</button>
             </div>
         </div>
     </div>
@@ -295,40 +484,106 @@
         // --- State Management ---
         const STATE = {
             stops: [],
-            driverPos: null, // User ki current location
-            tempCoords: null, // Naya stop add karte waqt ki location
+            driverPos: null,      // Driver's active GPS coordinate
+            tempCoords: null,     // Holds coordinate when adding/marking new stops
+            currentShift: 'morning', // morning (pickup) or afternoon (drop-off)
             map: null,
             markerLayer: null,
             driverMarker: null,
             routeLine: null
         };
 
-        // --- Init & Load Data ---
+        // --- Init & Auto Daily Reset Logic ---
         function initApp() {
-            // LocalStorage se purane stops load kare
-            const saved = localStorage.getItem('busStopsData');
+            // Load saved stops
+            const saved = localStorage.getItem('schoolBusStopsData');
             if (saved) {
                 STATE.stops = JSON.parse(saved);
             }
-            
-            // Date set kare
-            const now = new Date();
-            document.getElementById('liveDate').textContent = now.toLocaleDateString('hi-IN', { weekday: 'long', day: 'numeric', month: 'long' });
 
-            // Map Initialize kare
+            // Set Shift Mode
+            const savedShift = localStorage.getItem('schoolBusShift');
+            if (savedShift) {
+                STATE.currentShift = savedShift;
+                setShiftUI(savedShift);
+            }
+
+            // Set Current Date & Check for Daily Reset
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('mr-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+            document.getElementById('liveDate').textContent = dateStr;
+
+            checkDailyReset();
+
+            // Setup Leaflet Map
             initMap();
             
-            // GPS Chalu Kare
+            // Start GPS Watcher
             startGPS();
 
-            // UI update kare
+            // Draw everything
             updateUI();
+        }
+
+        // AUTO RESET: If next day, reset all stops' completed status to 'pending'
+        function checkDailyReset() {
+            const todayKey = new Date().toDateString(); // e.g. "Tue Jul 07 2026"
+            const lastSavedDate = localStorage.getItem('lastOpenedDate');
+
+            if (lastSavedDate && lastSavedDate !== todayKey) {
+                // Change of day detected! Reset all stop statuses
+                STATE.stops.forEach(stop => {
+                    stop.status = 'pending';
+                });
+                localStorage.setItem('schoolBusStopsData', JSON.stringify(STATE.stops));
+                showToast("🌅 शुभ सकाळ! आजचे सर्व थांबे आपोआप रीसेट झाले आहेत.");
+            }
+            
+            // Save today's date as last opened
+            localStorage.setItem('lastOpenedDate', todayKey);
+        }
+
+        // Manual Force Reset
+        function confirmManualReset() {
+            if (confirm("तुम्हाला आजचे सर्व थांबे पुन्हा सुरूवातीपासून (Pending) करायचे आहेत का?")) {
+                STATE.stops.forEach(stop => {
+                    stop.status = 'pending';
+                });
+                saveData();
+                updateUI();
+                showToast("🔄 सर्व थांबे यशस्वीरित्या रीसेट झाले!");
+            }
+        }
+
+        // Shift Toggle (Sakal / Dupar)
+        function setShift(shiftMode) {
+            STATE.currentShift = shiftMode;
+            localStorage.setItem('schoolBusShift', shiftMode);
+            setShiftUI(shiftMode);
+            updateUI();
+            showToast(shiftMode === 'morning' ? "☀️ सकाळची शिफ्ट निवडली" : "🌙 दुपारची शिफ्ट निवडली");
+        }
+
+        function setShiftUI(shiftMode) {
+            const morningBtn = document.getElementById('btnMorning');
+            const afternoonBtn = document.getElementById('btnAfternoon');
+            const label = document.getElementById('listTitleLabel');
+
+            if (shiftMode === 'morning') {
+                morningBtn.classList.add('active');
+                afternoonBtn.classList.remove('active');
+                label.textContent = "सकाळचे थांबे (घरून शाळा):";
+            } else {
+                afternoonBtn.classList.add('active');
+                morningBtn.classList.remove('active');
+                label.textContent = "दुपारचे थांबे (शाळेतून घरी):";
+            }
         }
 
         // --- Map Logic ---
         function initMap() {
-            // Default center agar GPS nai hai
-            STATE.map = L.map('map', { zoomControl: false }).setView([18.6279, 73.8009], 13); // Default to Pimpri
+            // Default center Pimpri/Pune area if GPS not loaded yet
+            STATE.map = L.map('map', { zoomControl: false, attributionControl: false }).setView([18.6279, 73.8009], 13);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(STATE.map);
             STATE.markerLayer = L.layerGroup().addTo(STATE.map);
         }
@@ -340,39 +595,59 @@
 
             const points = [];
 
-            // Add Driver Marker
+            // Add Driver (Bus) Marker
             if (STATE.driverPos) {
                 points.push([STATE.driverPos.lat, STATE.driverPos.lng]);
-                STATE.driverMarker = L.circleMarker([STATE.driverPos.lat, STATE.driverPos.lng], {
-                    radius: 8, color: 'white', weight: 2, fillColor: '#1a73e8', fillOpacity: 1
+                
+                // Pulsing outer blue radius
+                L.circle([STATE.driverPos.lat, STATE.driverPos.lng], {
+                    radius: 30, color: '#2979ff', fillColor: '#2979ff', fillOpacity: 0.2, weight: 1
                 }).addTo(STATE.markerLayer);
+
+                STATE.driverMarker = L.circleMarker([STATE.driverPos.lat, STATE.driverPos.lng], {
+                    radius: 9, color: 'white', weight: 3, fillColor: '#2979ff', fillOpacity: 1
+                }).addTo(STATE.markerLayer).bindPopup("<b>🚌 तुमची बस इथे आहे</b>");
             }
 
-            // Add Stop Markers
-            STATE.stops.forEach((stop, i) => {
+            // Determine rendering order based on morning/afternoon shift direction
+            const displayStops = [...STATE.stops];
+            if (STATE.currentShift === 'afternoon') {
+                // Afternoon route is reversed (school to home drop-off)
+                displayStops.reverse();
+            }
+
+            // Plot stops
+            displayStops.forEach((stop, i) => {
                 const isDone = stop.status === 'completed';
-                const color = isDone ? '#9aa0a6' : '#f4b400';
-                const iconHtml = `<div style="background:${color};color:white;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;border:2px solid white;box-shadow:0 2px 4px rgba(0,0,0,0.3)">${i+1}</div>`;
+                const color = isDone ? '#9aa0a6' : (i === getNextPendingIndex(displayStops) ? '#ffd600' : '#ff9100');
                 
-                const icon = L.divIcon({ className: '', html: iconHtml, iconSize: [28,28], iconAnchor: [14,14] });
+                const iconHtml = `<div style="background:${color};color:black;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;border:2px solid white;box-shadow:0 3px 6px rgba(0,0,0,0.4);font-size:0.9rem">${i+1}</div>`;
+                const icon = L.divIcon({ className: '', html: iconHtml, iconSize: [30,30], iconAnchor: [15,15] });
+                
                 L.marker([stop.coords.lat, stop.coords.lng], { icon: icon })
                  .addTo(STATE.markerLayer)
-                 .bindPopup(`<b>${stop.name}</b><br>${isDone ? 'Ho gaya ✅' : 'Jana hai ⏳'}`);
+                 .bindPopup(`<b>${stop.name}</b><br>${isDone ? 'झाला ✔' : 'बाकी ⏳'}`);
 
-                if (!isDone) points.push([stop.coords.lat, stop.coords.lng]);
+                if (!isDone) {
+                    points.push([stop.coords.lat, stop.coords.lng]);
+                }
             });
 
-            // Draw line to pending stops
+            // Draw route polyline matching driver's trip schedule
             if (points.length > 1) {
-                STATE.routeLine = L.polyline(points, { color: '#1a73e8', weight: 4, dashArray: '8, 8', opacity: 0.6 }).addTo(STATE.map);
+                STATE.routeLine = L.polyline(points, { color: '#ffd600', weight: 5, dashArray: '8, 8', opacity: 0.8 }).addTo(STATE.map);
             }
+        }
+
+        function getNextPendingIndex(orderedList) {
+            return orderedList.findIndex(s => s.status === 'pending');
         }
 
         function recenterMap() {
             if (STATE.driverPos && STATE.map) {
                 STATE.map.setView([STATE.driverPos.lat, STATE.driverPos.lng], 16);
             } else {
-                showToast("Pehle GPS connect hone de!");
+                showToast("जीपीएस सिग्नल मिळेपर्यंत थांबा...");
             }
         }
 
@@ -381,16 +656,16 @@
             const bounds = [];
             if(STATE.driverPos) bounds.push([STATE.driverPos.lat, STATE.driverPos.lng]);
             STATE.stops.forEach(s => bounds.push([s.coords.lat, s.coords.lng]));
-            if(bounds.length > 0) STATE.map.fitBounds(bounds, { padding: [30, 30] });
+            if(bounds.length > 0) STATE.map.fitBounds(bounds, { padding: [40, 40] });
         }
 
-        // --- GPS Logic ---
+        // --- GPS Tracker Logic ---
         function startGPS() {
             const ind = document.getElementById('gpsIndicator');
             const txt = document.getElementById('gpsText');
 
             if (!navigator.geolocation) {
-                txt.textContent = "Aapka browser GPS support nai karta.";
+                txt.textContent = "मोबाईलमध्ये GPS सपोर्ट नाही.";
                 return;
             }
 
@@ -398,34 +673,33 @@
                 (pos) => {
                     STATE.driverPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
                     ind.className = 'dot active';
-                    txt.textContent = "GPS Connected 🟢";
+                    txt.textContent = "जीपीएस कनेक्टेड 🟢 (चालू जागा)";
                     updateMapElements();
                     updateListDistances();
                 },
                 (err) => {
                     ind.className = 'dot';
-                    txt.textContent = "GPS Error! Location ON kare.";
+                    txt.textContent = "GPS बंद आहे! कृपया Location चालू करा 🔴";
                     console.error(err);
                 },
-                { enableHighAccuracy: true, maximumAge: 2000 }
+                { enableHighAccuracy: true, maximumAge: 3000, timeout: 15000 }
             );
         }
 
-        // Calculate distance (Haversine)
+        // Haversine Distance (m / km)
         function calcDist(lat1, lon1, lat2, lon2) {
-            const R = 6371; // Radius of earth in km
+            const R = 6371; // km
             const dLat = (lat2 - lat1) * Math.PI / 180;
             const dLon = (lon2 - lon1) * Math.PI / 180;
             const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
                       Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
             const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-            const d = R * c; // Distance in km
-            return d < 1 ? Math.round(d * 1000) + ' m' : d.toFixed(1) + ' km';
+            const d = R * c;
+            return d < 1 ? Math.round(d * 1000) + ' मी' : d.toFixed(1) + ' किमी';
         }
 
-        // --- UI Updates ---
+        // --- High Contrast Driver UI Rendering ---
         function updateUI() {
-            // Update Summary
             const total = STATE.stops.length;
             const done = STATE.stops.filter(s => s.status === 'completed').length;
             
@@ -433,47 +707,77 @@
             document.getElementById('countDone').textContent = done;
             document.getElementById('countLeft').textContent = total - done;
 
-            // Update List
             const listDiv = document.getElementById('stopsList');
             listDiv.innerHTML = '';
 
-            if (STATE.stops.length === 0) {
-                listDiv.innerHTML = '<div style="text-align:center; padding: 20px; color: gray;">Koi stop nahi hai. "+" dabaye naya add karne ke liye.</div>';
+            if (total === 0) {
+                listDiv.innerHTML = `
+                    <div style="text-align:center; padding: 40px 20px; color: var(--grey); background: var(--surface); border-radius: var(--radius); border: 2px dashed var(--border);">
+                        <p style="font-size: 1.2rem; font-weight: bold; margin-bottom: 8px;">एकूण शून्य थांबे</p>
+                        <p style="font-size: 0.9rem;">नवीन थांबा जोडण्यासाठी खालील पिवळे (+) बटण दाबा.</p>
+                    </div>
+                `;
+                updateMapElements();
+                return;
             }
 
-            STATE.stops.forEach((stop, index) => {
+            // Create display sequence based on Morning vs Afternoon (reversed drop-off)
+            const displayStops = [...STATE.stops];
+            if (STATE.currentShift === 'afternoon') {
+                displayStops.reverse();
+            }
+
+            // Find first pending index to highlight
+            const nextPendingIndex = getNextPendingIndex(displayStops);
+
+            displayStops.forEach((stop, index) => {
                 const isDone = stop.status === 'completed';
+                const isNext = (index === nextPendingIndex); // Highlight Active Destination
+                
                 const distStr = (STATE.driverPos && !isDone) ? 
                     calcDist(STATE.driverPos.lat, STATE.driverPos.lng, stop.coords.lat, stop.coords.lng) : '--';
                 
                 const card = document.createElement('div');
-                card.className = `stop-card ${isDone ? 'done' : ''}`;
+                card.className = `stop-card ${isDone ? 'done' : ''} ${isNext ? 'active-next' : ''}`;
                 
-                let actionsHTML = '';
+                // Determine direction marker icon
+                const travelIcon = STATE.currentShift === 'morning' ? '🏠 ➔ 🏫' : '🏫 ➔ 🏠';
+
+                // Large action layout
+                let actionBtnHTML = '';
                 if (!isDone) {
-                    actionsHTML = `
-                        <div class="stop-actions">
-                            <button class="btn btn-primary" onclick="openNavMap(${stop.coords.lat}, ${stop.coords.lng})">🧭 Direction Dekho</button>
-                            <button class="btn btn-green" onclick="markDone('${stop.id}')">✅ Puhanch Gaya</button>
-                            <button class="btn btn-danger" onclick="deleteStop('${stop.id}')">🗑️</button>
+                    actionBtnHTML = `
+                        <div class="stop-action-btns">
+                            ${stop.phone ? `<a href="tel:${stop.phone}" class="call-btn" title="फोन लावा">📞</a>` : ''}
+                            <button class="dir-btn" onclick="openNavMap(${stop.coords.lat}, ${stop.coords.lng})" title="नकाशा मार्ग">🧭</button>
+                            <button class="tick-btn" onclick="markDone('${stop.id}')" title="पूर्ण झाले">✔</button>
                         </div>
                     `;
                 } else {
-                    actionsHTML = `
-                        <div class="stop-actions">
-                            <button class="btn btn-danger" onclick="deleteStop('${stop.id}')" style="flex: 1;">🗑️ Delete Kare</button>
+                    actionBtnHTML = `
+                        <div class="stop-action-btns">
+                            <div class="already-done-check">✔</div>
+                            <button class="del-btn-quick" onclick="deleteStop('${stop.id}')" title="डिलीट">🗑️</button>
                         </div>
                     `;
                 }
 
                 card.innerHTML = `
-                    <div class="stop-card-top">
-                        <div class="stop-name">${index + 1}. ${stop.name}</div>
-                        <div class="stop-dist class-dist" data-lat="${stop.coords.lat}" data-lng="${stop.coords.lng}">
-                            📍 ${isDone ? 'Ho gaya' : distStr + ' door'}
+                    <div class="stop-info">
+                        <div class="stop-name-row">
+                            <div class="stop-badge">${index + 1}</div>
+                            <div class="stop-name">${stop.name}</div>
+                        </div>
+                        <div class="stop-details">
+                            <span class="dist-badge class-dist" data-lat="${stop.coords.lat}" data-lng="${stop.coords.lng}">
+                                📍 ${distStr} लांब
+                            </span>
+                            <span style="color: var(--grey); font-weight: bold; font-size: 0.8rem;">
+                                ${travelIcon}
+                            </span>
                         </div>
                     </div>
-                    ${actionsHTML}
+                    ${actionBtnHTML}
                 `;
                 listDiv.appendChild(card);
             });
@@ -481,20 +785,19 @@
             updateMapElements();
         }
 
-        // Fast update for distances only (runs on GPS tick)
+        // Lightweight live GPS updates for distances to save battery & processing
         function updateListDistances() {
             if (!STATE.driverPos) return;
             document.querySelectorAll('.class-dist').forEach(el => {
-                if (el.textContent.includes('Ho gaya')) return; // skip completed
                 const lat = parseFloat(el.getAttribute('data-lat'));
                 const lng = parseFloat(el.getAttribute('data-lng'));
-                el.textContent = `📍 ${calcDist(STATE.driverPos.lat, STATE.driverPos.lng, lat, lng)} door`;
+                el.textContent = `📍 ${calcDist(STATE.driverPos.lat, STATE.driverPos.lng, lat, lng)} लांब`;
             });
         }
 
-        // --- Stop Actions ---
+        // --- Stop Operations ---
         function openNavMap(lat, lng) {
-            // Opens default maps app (Google Maps on Android)
+            // High reliability redirect to native system navigation mapping tools
             window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving`, '_blank');
         }
 
@@ -504,27 +807,30 @@
                 stop.status = 'completed';
                 saveData();
                 updateUI();
-                showToast('Badhiya! Stop complete ho gaya.');
+                showToast(`मस्त! ${stop.name} थांबा पूर्ण झाला.`);
             }
         }
 
         function deleteStop(id) {
-            if(confirm('KYa aap sach me ye stop hatana chahte hai?')) {
+            const stop = STATE.stops.find(s => s.id === id);
+            const stopName = stop ? stop.name : "हा थांबा";
+            if (confirm(`तुम्हाला नक्की '${stopName}' या विद्यार्थ्याचा मार्ग हटवायचा आहे का?`)) {
                 STATE.stops = STATE.stops.filter(s => s.id !== id);
                 saveData();
                 updateUI();
-                showToast('Stop delete kar diya gaya.');
+                showToast("थांबा यशस्वीरित्या डिलीट केला.");
             }
         }
 
-        // --- Modal Logic ---
+        // --- Modal Control Flow ---
         function openModal() {
             document.getElementById('stopNameInput').value = '';
-            STATE.tempCoords = null; // Reset temp coords
+            document.getElementById('stopPhoneInput').value = '';
+            STATE.tempCoords = null;
             
             const btn = document.getElementById('btnFetchLocation');
             btn.className = 'fetch-btn';
-            btn.innerHTML = '📍 Meri Current Location Lo';
+            btn.innerHTML = '📍 माझी चालू जागा इथेच सेट करा';
             
             document.getElementById('addModal').style.display = 'flex';
         }
@@ -533,42 +839,43 @@
             document.getElementById('addModal').style.display = 'none';
         }
 
-        // NAYA FEATURE: Save current location while standing there
+        // GEOLOCATION ACTION: Save the exact spot where driver currently stands
         function fetchAndSaveTempLocation() {
             if (!STATE.driverPos) {
-                showToast('Bhaiya pehle GPS load hone do (Neeche status dekho)');
+                showToast('थांबा! अजून जीपीएस लोकेशन मिळाले नाही.');
                 return;
             }
             
-            // Store coordinates in temp state for the new stop
+            // Lock location data in state
             STATE.tempCoords = { ...STATE.driverPos };
             
-            // Update UI Button
+            // Visual confirmation inside modal
             const btn = document.getElementById('btnFetchLocation');
             btn.className = 'fetch-btn success';
-            btn.innerHTML = '✅ Location Set Ho Gayi!';
+            btn.innerHTML = '✅ जागा यशस्वीरित्या सेट झाली!';
             
-            showToast('Aapki current location set ho gayi.');
+            showToast('तुम्ही उभे असलेली जागा रेकॉर्ड केली आहे.');
         }
 
         function saveNewStop() {
             const name = document.getElementById('stopNameInput').value.trim();
+            const phone = document.getElementById('stopPhoneInput').value.trim();
             
             if (!name) {
-                showToast('Pehle stop ka naam likhe!');
+                showToast('कृपया विद्यार्थ्याचे किंवा थांब्याचे नाव लिहा!');
                 return;
             }
             if (!STATE.tempCoords) {
-                showToast('Neeche button dabakar Location Set kare!');
+                showToast('कृपया "माझी चालू जागा सेट करा" वर क्लिक करा!');
                 return;
             }
 
-            // Create new stop
             const newStop = {
                 id: Date.now().toString(),
                 name: name,
+                phone: phone,
                 coords: STATE.tempCoords,
-                status: 'pending' // pending or completed
+                status: 'pending' // pending, completed
             };
 
             STATE.stops.push(newStop);
@@ -576,30 +883,30 @@
             updateUI();
             closeModal();
             zoomToAll();
-            showToast('Naya stop list me add ho gaya!');
+            showToast('नवीन थांबा यशस्वीरित्या जोडला गेला!');
         }
 
-        // --- Helpers ---
+        // --- Local Storage Utils ---
         function saveData() {
-            localStorage.setItem('busStopsData', JSON.stringify(STATE.stops));
+            localStorage.setItem('schoolBusStopsData', JSON.stringify(STATE.stops));
         }
 
         function showToast(msg) {
-            // Remove old toast if exists
             const old = document.querySelector('.toast');
-            if(old) old.remove();
+            if (old) old.remove();
             
             const t = document.createElement('div');
             t.className = 'toast';
-            t.textContent = msg;
+            t.innerHTML = `🔔 <span>${msg}</span>`;
             document.body.appendChild(t);
             
-            setTimeout(() => { if(t.parentElement) t.remove(); }, 2500);
+            setTimeout(() => { if (t.parentElement) t.remove(); }, 2800);
         }
 
-        // Start
+        // Document Load Initializer
         document.addEventListener('DOMContentLoaded', initApp);
 
     </script>
 </body>
 </html>
+
