@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Bus Route Navigator · Leaflet</title>
+
+    <!-- Leaflet + Routing Machine (CDN) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
+
+    <style>
+        :root {
+            --primary: #1a73e8;
+            --primary-dark: #1557b0;
+            --primary-light: #e8f0fe;
+            --surface: #ffffff;
+            --background: #f8f9fa;
+            --green: #0f9d58;
+            --green-light: #e6f4ea;
+            --orange: #f4b400;
+            --orange-light: #fef7e0;
+            --red: #db4437;
+            --grey: #9aa0a6;
+            --grey-light: #f1f3f4;
+            --text: #202124;
+            --text-secondary: #5f6368;
+            --border: #dadce0;
+            --shadow: 0 1px 3px rgba(0,0,0,0.12);
+            --shadow-lg: 0 4px 12px rgba(0,0,0,0.15);
+            --radius: 16px;
+            --radius-sm: 10px;
+            --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            --safe-bottom: env(safe-area-inset-bottom, 16px);
+            --bottom-nav-height: 64px;
+        }
+        *{margin:0;padding:0;box-sizing:border-box}
+        html{font-size:15px;-webkit-tap-highlight-color:transparent;scroll-behavior:smooth}
+        body{
+            font-family:'Google Sans','Roboto',system-ui,sans-serif;
+            background:var(--background);color:var(--text);
+            min-height:100vh;padding-bottom:calc(var(--bottom-nav-height) + var(--safe-bottom) + 80px);
+        }
+        .header{
+            background:var(--surface);padding:12px 16px;position:sticky;top:0;z-index:100;
+            border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+            box-shadow:var(--shadow);
+        }
+        .header .logo-icon{width:36px;height:36px;background:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px}
+        .header .date-time{flex:1;min-width:120px;text-align:center}
+        .header .date-time .time{font-size:1.3rem;font-weight:700;letter-spacing:-0.5px}
+        .header .date-time .date{font-size:0.78rem;color:var(--text-secondary)}
+        .header .info-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+        .header .info-tag{display:flex;align-items:center;gap:5px;background:var(--primary-light);color:var(--primary);padding:6px 10px;border-radius:20px;font-size:0.78rem;font-weight:500;border:1.5px solid transparent;transition:var(--transition);cursor:pointer}
+        .header .info-tag:hover{border-color:var(--primary);background:#d2e3fc}
+        .header .info-tag input{border:none;background:transparent;font-size:0.78rem;font-weight:500;color:var(--primary);outline:none;width:90px;font-family:inherit}
+        .summary-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:10px 12px}
+        .summary-card{background:var(--surface);border-radius:var(--radius-sm);padding:12px 10px;text-align:center;box-shadow:var(--shadow);border:2px solid transparent;transition:var(--transition)}
+        .summary-card.active{border-color:var(--primary);background:var(--primary-light)}
+        .summary-card .card-value{font-size:1.6rem;font-weight:700;color:var(--primary)}
+        .summary-card .card-label{font-size:0.68rem;color:var(--text-secondary);text-transform:uppercase;margin-top:2px}
+        .summary-card.completed .card-value{color:var(--green)}
+        .summary-card.remaining .card-value{color:var(--orange)}
+        .progress-wrap{padding:0 12px;margin-bottom:8px}
+        .progress-bar-outer{background:var(--grey-light);border-radius:20px;height:10px;overflow:hidden}
+        .progress-bar-inner{background:var(--primary);height:100%;border-radius:20px;transition:width 0.5s ease;width:0%}
+        .progress-label{display:flex;justify-content:space-between;font-size:0.7rem;color:var(--text-secondary);margin-top:3px}
+        .map-container{margin:0 12px;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-lg);height:42vh;min-height:280px;position:relative;border:2px solid var(--border)}
+        #map{width:100%;height:100%}
+        .map-overlay{position:absolute;top:10px;right:10px;z-index:1000;display:flex;flex-direction:column;gap:6px}
+        .map-btn{width:38px;height:38px;border-radius:50%;background:var(--surface);border:1px solid var(--border);cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow);transition:var(--transition);color:var(--text)}
+        .map-btn:active{background:#e8eaed;transform:scale(0.94)}
+        .map-status{position:absolute;bottom:10px;left:10px;right:10px;background:var(--surface);border-radius:8px;padding:8px 12px;font-size:0.75rem;font-weight:500;box-shadow:var(--shadow);z-index:1000;display:flex;align-items:center;gap:8px;pointer-events:none}
+        .dot{width:8px;height:8px;border-radius:50%;animation:pulse 1.8s infinite}
+        .dot.green{background:var(--green)}.dot.blue{background:var(--primary)}
+        @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(15,157,88,0.5)}50%{box-shadow:0 0 0 10px rgba(15,157,88,0)}}
+        .search-wrap{padding:10px 12px;position:relative}
+        .search-input{width:100%;padding:11px 16px 11px 40px;border-radius:24px;border:1.5px solid var(--border);font-size:0.9rem;background:var(--surface);outline:none;transition:var(--transition);font-family:inherit;box-shadow:var(--shadow)}
+        .search-input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(26,115,232,0.15)}
+        .search-icon{position:absolute;left:24px;top:50%;transform:translateY(-50%);color:var(--grey);font-size:1rem}
+        .route-list{padding:0 12px;display:flex;flex-direction:column;gap:10px;max-height:50vh;overflow-y:auto}
+        .stop-card{background:var(--surface);border-radius:var(--radius-sm);padding:14px;box-shadow:var(--shadow);border-left:4px solid var(--primary);animation:fadeInUp 0.3s ease}
+        @keyframes fadeInUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+        .stop-card.completed{border-left-color:var(--green);background:var(--green-light)}
+        .stop-card.active-stop{border-left-color:var(--primary);box-shadow:0 0 0 3px rgba(26,115,232,0.2)}
+        .stop-card .card-header{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+        .stop-card .passenger-name{font-weight:600;font-size:1rem}
+        .stop-card .stop-number{background:var(--primary);color:#fff;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700}
+        .stop-card.completed .stop-number{background:var(--green)}
+        .address-line{font-size:0.8rem;color:var(--text-secondary);margin-top:4px;display:flex;align-items:center;gap:4px}
+        .meta-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;font-size:0.72rem;color:var(--text-secondary)}
+        .action-row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+        .btn{padding:9px 16px;border-radius:20px;font-weight:600;font-size:0.8rem;cursor:pointer;border:none;display:flex;align-items:center;gap:5px;font-family:inherit;white-space:nowrap;min-height:38px;transition:var(--transition)}
+        .btn:active{transform:scale(0.95)}
+        .btn-primary{background:var(--primary);color:#fff}
+        .btn-green{background:var(--green);color:#fff}
+        .btn-orange{background:var(--orange);color:#fff}
+        .btn-outline{background:#fff;color:var(--primary);border:1.5px solid var(--primary)}
+        .btn-ghost{background:transparent;color:var(--text-secondary)}
+        .btn-danger{color:var(--red);border:1.5px solid var(--red);background:#fff}
+        .btn-sm{padding:6px 12px;font-size:0.72rem;min-height:30px;border-radius:16px}
+        .fab{position:fixed;bottom:calc(var(--bottom-nav-height) + var(--safe-bottom) + 16px);right:20px;width:56px;height:56px;border-radius:50%;background:var(--primary);color:#fff;font-size:1.8rem;border:none;cursor:pointer;box-shadow:0 4px 16px rgba(26,115,232,0.4);z-index:90;transition:var(--transition);display:flex;align-items:center;justify-content:center}
+        .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);display:flex;justify-content:space-around;align-items:center;height:var(--bottom-nav-height);padding-bottom:var(--safe-bottom);z-index:100;box-shadow:0 -2px 8px rgba(0,0,0,0.06)}
+        .nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:6px 14px;border-radius:12px;font-size:0.65rem;font-weight:500;color:var(--text-secondary);border:none;background:none;font-family:inherit;transition:var(--transition)}
+        .nav-item.active{color:var(--primary)}
+        .nav-item .nav-icon{font-size:1.3rem}
+        .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;display:flex;align-items:flex-end;justify-content:center;animation:fadeIn 0.2s ease}
+        .modal-sheet{background:var(--surface);border-radius:20px 20px 0 0;width:100%;max-width:600px;max-height:85vh;overflow-y:auto;padding:20px 16px;box-shadow:var(--shadow-lg);animation:slideUp 0.3s ease}
+        @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+        .form-group{margin-bottom:14px}
+        .form-group label{display:block;font-size:0.78rem;font-weight:600;color:var(--text-secondary);margin-bottom:5px;text-transform:uppercase}
+        .form-group input,.form-group textarea{width:100%;padding:10px 14px;border-radius:8px;border:1.5px solid var(--border);font-size:0.9rem;font-family:inherit;outline:none;background:var(--grey-light);color:var(--text);transition:var(--transition)}
+        .form-group input:focus,.form-group textarea:focus{border-color:var(--primary);background:#fff;box-shadow:0 0 0 3px rgba(26,115,232,0.1)}
+        .form-actions{display:flex;gap:10px;margin-top:18px}
+        .toast{position:fixed;bottom:calc(var(--bottom-nav-height) + var(--safe-bottom) + 80px);left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:10px 20px;border-radius:24px;font-size:0.85rem;z-index:300;animation:toastIn 0.3s ease,toastOut 0.3s ease 2s forwards;pointer-events:none}
+        @keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(20px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+        @keyframes toastOut{from{opacity:1}to{opacity:0;transform:translateX(-50%) translateY(20px)}}
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="logo-icon">🚌</div>
+        <div class="date-time">
+            <div class="time" id="liveTime">--:--:--</div>
+            <div class="date" id="liveDate">---</div>
+        </div>
+        <div class="info-row">
+            <span class="info-tag"><span>👤</span><input id="driverNameInput" placeholder="Driver"></span>
+            <span class="info-tag"><span>🚍</span><input id="busNumberInput" placeholder="Bus #"></span>
+        </div>
+    </header>
+
+    <!-- Summary Cards -->
+    <div class="summary-row">
+        <div class="summary-card"><div class="card-value" id="totalStops">0</div><div class="card-label">Total</div></div>
+        <div class="summary-card completed"><div class="card-value" id="completedStops">0</div><div class="card-label">Done</div></div>
+        <div class="summary-card remaining"><div class="card-value" id="remainingStops">0</div><div class="card-label">Left</div></div>
+        <div class="summary-card active"><div class="card-value" id="currentStopNum">-</div><div class="card-label">Now</div></div>
+    </div>
+
+    <!-- Progress -->
+    <div class="progress-wrap">
+        <div class="progress-bar-outer"><div class="progress-bar-inner" id="progressBar" style="width:0%"></div></div>
+        <div class="progress-label"><span id="progressText">0%</span><span id="progressDetail">0/0</span></div>
+    </div>
+
+    <!-- Map -->
+    <div class="map-container"><div id="map"></div>
+        <div class="map-overlay">
+            <button class="map-btn" id="btnRecenter">📍</button>
+            <button class="map-btn" id="btnZoomRoute">🔍</button>
+        </div>
+        <div class="map-status"><span class="dot blue" id="statusDot"></span><span id="statusText">Waiting for GPS…</span></div>
+    </div>
+
+    <!-- Search -->
+    <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input class="search-input" id="searchInput" placeholder="Search name/address…" autocomplete="off">
+    </div>
+
+    <!-- Route Cards -->
+    <div class="route-list" id="routeList"></div>
+
+    <!-- FAB -->
+    <button class="fab" id="fabAdd">+</button>
+
+    <!-- Bottom Nav -->
+    <nav class="bottom-nav">
+        <button class="nav-item active" data-view="all"><span class="nav-icon">📋</span>All</button>
+        <button class="nav-item" data-view="pending"><span class="nav-icon">⏳</span>Pending</button>
+        <button class="nav-item" data-view="completed"><span class="nav-icon">✅</span>Done</button>
+    </nav>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="modalOverlay" style="display:none">
+        <div class="modal-sheet">
+            <h2 id="modalTitle">Add Stop</h2>
+            <form id="stopForm" autocomplete="off">
+                <input type="hidden" id="stopId">
+                <div class="form-group"><label>Name *</label><input id="passengerName" required></div>
+                <div class="form-group"><label>Pickup *</label><input id="pickupAddress" required></div>
+                <div class="form-group"><label>Drop *</label><input id="dropAddress" required></div>
+                <div class="form-group"><label>Time</label><input type="time" id="pickupTime"></div>
+                <div class="form-group"><label>Phone</label><input type="tel" id="phoneNumber"></div>
+                <div class="form-group"><label>Notes</label><textarea id="notes" rows="2"></textarea></div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-outline" id="btnCancel">Cancel</button>
+                    <button type="submit" class="btn btn-primary">💾 Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast container -->
+    <div id="toastContainer"></div>
+
+    <!-- Leaflet JS + Routing Machine -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
+
+    <script>
+    (function() {
+        /* ---------- STATE ---------- */
+        const STATE = {
+            driverName: 'Driver',
+            busNumber: 'BUS-1',
+            stops: [],
+            driverPos: null,
+            map: null,
+            routingControl: null,
+            markersLayer: null,
+            polyline: null,
+            driverMarker: null,
+            watchId: null,
+            currentView: 'all',
+            geocodeCache: {}
+        };
+
+        /* ---------- DOM REFS ---------- */
+        const $ = (s) => document.querySelector(s);
+        const $$ = (s) => document.querySelectorAll(s);
+
+        const D = {
+            time: $('#liveTime'),
+            date: $('#liveDate'),
+            drvName: $('#driverNameInput'),
+            busNo: $('#busNumberInput'),
+            total: $('#totalStops'),
+            done: $('#completedStops'),
+            left: $('#remainingStops'),
+            current: $('#currentStopNum'),
+            bar: $('#progressBar'),
+            barText: $('#progressText'),
+            barDetail: $('#progressDetail'),
+            list: $('#routeList'),
+            search: $('#searchInput'),
+            mapDiv: $('#map'),
+            status: $('#statusText'),
+            statusDot: $('#statusDot'),
+            modal: $('#modalOverlay'),
+            form: $('#stopForm'),
+            stopId: $('#stopId'),
+            name: $('#passengerName'),
+            pickup: $('#pickupAddress'),
+            drop: $('#dropAddress'),
+            time: $('#pickupTime'),
+            phone: $('#phoneNumber'),
+            notes: $('#notes'),
+            toast: $('#toastContainer'),
+            btnRecenter: $('#btnRecenter'),
+            btnZoom: $('#btnZoomRoute'),
+            fab: $('#fabAdd'),
+            navItems: $$('.bottom-nav .nav-item')
+        };
+
+        /* ---------- HELPERS ---------- */
+        const esc = (s) => { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; };
+        const getCurrentIdx = () => STATE.stops.findIndex(s => s.status !== 'drop_complete');
+        const currentStop = () => { const i = getCurrentIdx(); return i >= 0 ? STATE.stops[i] : null; };
+        const completedCount = () => STATE.stops.filter(s => s.status === 'drop_complete').length;
+        const remainingCount = () => STATE.stops.filter(s => s.status !== 'drop_complete').length;
+        const calcDist = (a, b) => {
+            if (!a || !b) return '--';
+            const R = 6371, dLat = (b.lat - a.lat)*Math.PI/180, dLon = (b.lng - a.lng)*Math.PI/180;
+            const sin = Math.sin(dLat/2), cos = Math.cos(a.lat*Math.PI/180);
+            const km = R * 2 * Math.atan2(Math.sqrt(sin*sin + cos*cos*Math.sin(dLon/2)**2), Math.sqrt(1 - sin*sin - cos*cos*Math.sin(dLon/2)**2));
+            return km < 1 ? Math.round(km*1000)+' m' : km.toFixed(1)+' km';
+        };
+        const toast = (msg) => {
+            const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
+            D.toast.appendChild(t); setTimeout(() => t.remove(), 2500);
+        };
+
+        /* ---------- STORAGE ---------- */
+        const save = () => {
+            const data = { driverName: STATE.driverName, busNumber: STATE.busNumber, stops: STATE.stops };
+            localStorage.setItem('busLeafletV2', JSON.stringify(data));
+        };
+        const load = () => {
+            try {
+                const raw = localStorage.getItem('busLeafletV2');
+                if (raw) {
+                    const d = JSON.parse(raw);
+                    STATE.driverName = d.driverName || 'Driver';
+                    STATE.busNumber = d.busNumber || 'BUS-1';
+                    STATE.stops = d.stops || [];
+                }
+            } catch(e) {}
+        };
+
+        /* ---------- GEOCODING (Nominatim) ---------- */
+        const geocode = async (addr) => {
+            const key = addr.trim().toLowerCase();
+            if (STATE.geocodeCache[key]) return STATE.geocodeCache[key];
+            try {
+                const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(addr)}&limit=1`;
+                const r = await fetch(url, { headers: { 'User-Agent': 'BusDriverLeaflet/2.0' } });
+                const data = await r.json();
+                if (data.length) {
+                    const coords = { lat: +data[0].lat, lng: +data[0].lon };
+                    STATE.geocodeCache[key] = coords;
+                    return coords;
+                }
+            } catch(e) { console.warn('Geocode fail', e); }
+            return null;
+        };
+        const geocodeAll = async () => {
+            const tasks = STATE.stops.map(async s => {
+                if (!s.pickupCoords && s.pickupAddress) s.pickupCoords = await geocode(s.pickupAddress);
+                if (!s.dropCoords && s.dropAddress) s.dropCoords = await geocode(s.dropAddress);
+            });
+            await Promise.allSettled(tasks);
+            save();
+        };
+
+        /* ---------- MAP ICONS ---------- */
+        const makeIcon = (color, letter) => L.divIcon({
+            className: '',
+            html: `<div style="background:${color};color:white;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:14px;border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3)">${letter}</div>`,
+            iconSize: [30,30],
+            iconAnchor: [15,15]
+        });
+
+        /* ---------- MAP RENDERING ---------- */
+        const clearMapFeatures = () => {
+            if (STATE.markersLayer) { STATE.map.removeLayer(STATE.markersLayer); STATE.markersLayer = null; }
+            if (STATE.polyline) { STATE.map.removeLayer(STATE.polyline); STATE.polyline = null; }
+            if (STATE.routingControl) {
+                try { STATE.map.removeControl(STATE.routingControl); } catch(e) {}
+                STATE.routingControl = null;
+            }
+            if (STATE.driverMarker) { STATE.map.removeLayer(STATE.driverMarker); STATE.driverMarker = null; }
+        };
+
+        const updateMap = () => {
+            if (!STATE.map) return;
+            clearMapFeatures();
+
+            STATE.markersLayer = L.layerGroup().addTo(STATE.map);
+            const currIdx = getCurrentIdx();
+
+            STATE.stops.forEach((s, i) => {
+                const stage = s.status === 'drop_complete' ? 'done' : (s.status === 'pickup_complete' ? 'drop' : 'pickup');
+                const isCurrent = (i === currIdx);
+                let pColor = '#f4b400'; // orange
+                if (stage === 'done') pColor = '#9aa0a6';
+                else if (isCurrent && stage === 'pickup') pColor = '#0f9d58';
+
+                let dColor = '#db4437'; // red
+                if (stage === 'done') dColor = '#9aa0a6';
+                else if (isCurrent && stage === 'drop') dColor = '#0f9d58';
+
+                if (s.pickupCoords) L.marker(s.pickupCoords, { icon: makeIcon(pColor, 'P'+(i+1)) }).addTo(STATE.markersLayer).bindPopup(`<b>Stop ${i+1} Pickup</b><br>${esc(s.passengerName)}`);
+                if (s.dropCoords) L.marker(s.dropCoords, { icon: makeIcon(dColor, 'D'+(i+1)) }).addTo(STATE.markersLayer).bindPopup(`<b>Stop ${i+1} Drop</b><br>${esc(s.passengerName)}`);
+            });
+
+            // Driver marker (animated circle)
+            if (STATE.driverPos) {
+                STATE.driverMarker = L.circleMarker(STATE.driverPos, {
+                    radius: 9, color: '#1a73e8', fillColor: '#1a73e8', fillOpacity: 0.9, weight: 3
+                }).addTo(STATE.map).bindPopup('📍 You are here');
+            }
+
+            // Overall dashed route
+            const pts = [];
+            STATE.stops.forEach(s => { if(s.pickupCoords) pts.push(s.pickupCoords); if(s.dropCoords) pts.push(s.dropCoords); });
+            if (pts.length >= 2) STATE.polyline = L.polyline(pts, { color: '#1a73e8', weight: 3, opacity: 0.4, dashArray: '10 6' }).addTo(STATE.map);
+
+            // Active routing
+            const stop = currentStop();
+            if (stop && STATE.driverPos) {
+                const dest = stop.status === 'pending' ? stop.pickupCoords : stop.dropCoords;
+                if (dest) {
+                    try {
+                        STATE.routingControl = L.Routing.control({
+                            waypoints: [L.latLng(STATE.driverPos.lat, STATE.driverPos.lng), L.latLng(dest.lat, dest.lng)],
+                            routeWhileDragging: false,
+                            show: false,
+                            lineOptions: { styles: [{ color: '#0f9d58', weight: 5 }] },
+                            createMarker: () => null,
+                            router: L.Routing.osrmv1({ serviceUrl: 'https://router.project-osrm.org/route/v1' })
+                        }).addTo(STATE.map);
+                        STATE.routingControl.on('routesfound', e => {
+                            const r = e.routes[0];
+                            if (r) {
+                                D.status.textContent = `Next: ${stop.status==='pending'?'Pickup':'Drop'} ${stop.passengerName} · ${(r.summary.totalDistance/1000).toFixed(1)} km · ${Math.round(r.summary.totalTime/60)} min`;
+                                D.statusDot.className = 'dot green';
+                            }
+                        });
+                        STATE.routingControl.on('routingerror', () => {
+                            // fallback straight line
+                            STATE.polyline ? STATE.map.removeLayer(STATE.polyline) : null;
+                            STATE.polyline = L.polyline([STATE.driverPos, dest], { color: '#0f9d58', weight: 4, dashArray: '6 8' }).addTo(STATE.map);
+                            D.status.textContent = `Next: ${stop.passengerName} (route unavailable)`;
+                        });
+                    } catch(e) {
+                        // Routing Machine not available? Draw straight line
+                        STATE.polyline = L.polyline([STATE.driverPos, dest], { color: '#0f9d58', weight: 4 }).addTo(STATE.map);
+                    }
+                }
+            }
+        };
+
+        const zoomToFit = () => {
+            if (!STATE.map) return;
+            const group = [];
+            if (STATE.driverPos) group.push(STATE.driverPos);
+            STATE.stops.forEach(s => { if(s.pickupCoords) group.push(s.pickupCoords); if(s.dropCoords) group.push(s.dropCoords); });
+            if (group.length) STATE.map.fitBounds(L.latLngBounds(group.map(g => [g.lat, g.lng])), { padding: [30,30] });
+        };
+
+        /* ---------- GPS ---------- */
+        const startGPS = () => {
+            if (!navigator.geolocation) {
+                D.status.textContent = 'GPS not supported by browser.';
+                return;
+            }
+            const onSuccess = (pos) => {
+                STATE.driverPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+                if (STATE.map) updateMap();
+                D.status.textContent = 'GPS active';
+                D.statusDot.className = 'dot blue';
+            };
+            const onError = (err) => {
+                D.status.textContent = 'GPS error: ' + err.message + ' (needs HTTPS)';
+                D.statusDot.className = 'dot';
+                console.warn('GPS error', err);
+            };
+            if (STATE.watchId) navigator.geolocation.clearWatch(STATE.watchId);
+            STATE.watchId = navigator.geolocation.watchPosition(onSuccess, onError, { enableHighAccuracy: true, maximumAge: 5000 });
+            navigator.geolocation.getCurrentPosition(onSuccess, onError, { enableHighAccuracy: true, timeout: 10000 });
+        };
+
+        /* ---------- UI UPDATES ---------- */
+        const updateSummary = () => {
+            const total = STATE.stops.length;
+            const done = completedCount();
+            const left = remainingCount();
+            D.total.textContent = total;
+            D.done.textContent = done;
+            D.left.textContent = left;
+            D.current.textContent = total ? (getCurrentIdx()+1) : '-';
+            const stages = total*2;
+            const doneStages = done*2 + STATE.stops.filter(s=>s.status==='pickup_complete').length;
+            const pct = stages ? Math.round((doneStages/stages)*100) : 0;
+            D.bar.style.width = pct+'%';
+            D.barText.textContent = pct+'%';
+            D.barDetail.textContent = `${done}/${total} stops`;
+        };
+
+        const renderList = (filter = '') => {
+            const term = filter.toLowerCase().trim();
+            let list = STATE.stops;
+            if (STATE.currentView === 'pending') list = list.filter(s => s.status !== 'drop_complete');
+            else if (STATE.currentView === 'completed') list = list.filter(s => s.status === 'drop_complete');
+            if (term) list = list.filter(s => s.passengerName.toLowerCase().includes(term) || s.pickupAddress.toLowerCase().includes(term) || s.dropAddress.toLowerCase().includes(term));
+
+            D.list.innerHTML = '';
+            if (!list.length) {
+                D.list.innerHTML = '<div style="text-align:center;padding:30px;color:gray;">No stops</div>';
+                return;
+            }
+            const currIdx = getCurrentIdx();
+            list.forEach(s => {
+                const i = STATE.stops.indexOf(s);
+                const isCurrent = i === currIdx;
+                const stage = s.status === 'drop_complete' ? 'done' : (s.status === 'pickup_complete' ? 'drop' : 'pickup');
+                const dest = stage === 'pickup' ? s.pickupCoords : s.dropCoords;
+                const dist = dest ? calcDist(STATE.driverPos, dest) : '--';
+                const card = document.createElement('div');
+                card.className = 'stop-card' + (stage==='done'?' completed':'') + (isCurrent?' active-stop':'');
+                card.innerHTML = `
+                    <div class="card-header"><span class="passenger-name">${esc(s.passengerName)}</span><span class="stop-number">${i+1}</span></div>
+                    <div class="address-line">📍 ${esc(s.pickupAddress)}</div>
+                    <div class="address-line">🏁 ${esc(s.dropAddress)}</div>
+                    <div class="meta-row">
+                        ${s.pickupTime?`<span>🕐 ${s.pickupTime}</span>`:''}
+                        ${s.phone?`<span>📞 ${esc(s.phone)}</span>`:''}
+                        <span>📏 ${dist}</span>
+                        <span>${stage==='done'?'✅ Done':stage==='pickup'?'⏳ Await Pickup':'🚗 To Drop'}</span>
+                    </div>
+                    <div class="action-row">
+                        ${stage!=='done'?`
+                            <button class="btn btn-primary btn-sm nav-btn" data-id="${s.id}">🧭 Navigate</button>
+                            ${stage==='pickup'?`<button class="btn btn-green btn-sm pickup-btn" data-id="${s.id}">✅ Pickup</button>`:`<button class="btn btn-orange btn-sm drop-btn" data-id="${s.id}">🏁 Drop</button>`}
+                        `:''}
+                        <button class="btn btn-ghost btn-sm edit-btn" data-id="${s.id}">✏️</button>
+                        <button class="btn btn-danger btn-sm delete-btn" data-id="${s.id}">🗑️</button>
+                    </div>`;
+                D.list.appendChild(card);
+            });
+            attachCardEvents();
+        };
+
+        const attachCardEvents = () => {
+            $$('.nav-btn').forEach(b => b.onclick = () => navigate(b.dataset.id));
+            $$('.pickup-btn').forEach(b => b.onclick = () => pickupDone(b.dataset.id));
+            $$('.drop-btn').forEach(b => b.onclick = () => dropDone(b.dataset.id));
+            $$('.edit-btn').forEach(b => b.onclick = () => openEdit(b.dataset.id));
+            $$('.delete-btn').forEach(b => b.onclick = () => deleteStop(b.dataset.id));
+        };
+
+        const navigate = (id) => {
+            const s = STATE.stops.find(s=>s.id===id); if(!s) return;
+            const dest = s.status==='pending' ? s.pickupCoords : s.dropCoords;
+            if (dest) window.open(`https://www.google.com/maps/dir/?api=1&destination=${dest.lat},${dest.lng}&travelmode=driving`, '_blank');
+        };
+        const pickupDone = (id) => {
+            const s = STATE.stops.find(s=>s.id===id); if(!s || s.status!=='pending') return;
+            s.status='pickup_complete'; save(); updateAll(); toast('Pickup complete');
+        };
+        const dropDone = (id) => {
+            const s = STATE.stops.find(s=>s.id===id); if(!s || s.status!=='pickup_complete') return;
+            s.status='drop_complete'; save(); updateAll(); toast('Drop complete');
+        };
+        const deleteStop = (id) => {
+            if(!confirm('Delete this stop?')) return;
+            STATE.stops = STATE.stops.filter(s=>s.id!==id); save(); updateAll(); toast('Stop deleted');
+        };
+
+        const updateAll = () => {
+            updateSummary();
+            renderList(D.search.value);
+            if (STATE.map) updateMap();
+        };
+
+        /* ---------- MODAL ---------- */
+        const openAdd = () => { D.form.reset(); D.stopId.value=''; D.modal.style.display='flex'; D.name.focus(); };
+        const openEdit = (id) => {
+            const s = STATE.stops.find(s=>s.id===id); if(!s) return;
+            D.stopId.value=s.id; D.name.value=s.passengerName; D.pickup.value=s.pickupAddress; D.drop.value=s.dropAddress;
+            D.time.value=s.pickupTime||''; D.phone.value=s.phone||''; D.notes.value=s.notes||''; D.modal.style.display='flex';
+        };
+        const closeModal = () => { D.modal.style.display='none'; };
+
+        D.form.onsubmit = async (e) => {
+            e.preventDefault();
+            const id = D.stopId.value, name = D.name.value.trim(), pa = D.pickup.value.trim(), da = D.drop.value.trim();
+            if(!name||!pa||!da) return toast('Fill required fields');
+            if(id){
+                const s = STATE.stops.find(s=>s.id===id);
+                if(s){ s.passengerName=name; s.pickupAddress=pa; s.dropAddress=da; s.pickupTime=D.time.value; s.phone=D.phone.value; s.notes=D.notes.value; s.pickupCoords=null; s.dropCoords=null; }
+            } else {
+                STATE.stops.push({
+                    id: Date.now().toString(36)+Math.random().toString(36).slice(2),
+                    passengerName:name, pickupAddress:pa, dropAddress:da,
+                    pickupTime:D.time.value, phone:D.phone.value, notes:D.notes.value,
+                    pickupCoords:null, dropCoords:null, status:'pending'
+                });
+            }
+            closeModal(); save();
+            await geocodeAll();
+            updateAll();
+            zoomToFit();
+            toast(id?'Stop updated':'Stop added');
+        };
+
+        /* ---------- CLOCK ---------- */
+        const updateClock = () => {
+            const now = new Date();
+            D.time.textContent = now.toLocaleTimeString('en-US', {hour12:true, hour:'2-digit', minute:'2-digit', second:'2-digit'});
+            D.date.textContent = now.toLocaleDateString('en-US', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+        };
+
+        /* ---------- EVENTS ---------- */
+        const bindEvents = () => {
+            D.drvName.onchange = () => { STATE.driverName = D.drvName.value.trim()||'Driver'; save(); };
+            D.busNo.onchange = () => { STATE.busNumber = D.busNo.value.trim()||'BUS-1'; save(); };
+            D.search.oninput = () => renderList(D.search.value);
+            D.fab.onclick = openAdd;
+            D.btnRecenter.onclick = () => { if(STATE.driverPos && STATE.map) STATE.map.setView(STATE.driverPos, 16); };
+            D.btnZoom.onclick = zoomToFit;
+            D.navItems.forEach(b => b.onclick = function(){
+                D.navItems.forEach(x=>x.classList.remove('active')); this.classList.add('active');
+                STATE.currentView = this.dataset.view; renderList(D.search.value);
+            });
+            document.getElementById('btnCancel').onclick = closeModal;
+            D.modal.onclick = (e) => { if(e.target===D.modal) closeModal(); };
+        };
+
+        /* ---------- INIT ---------- */
+        const init = async () => {
+            load();
+            D.drvName.value = STATE.driverName;
+            D.busNo.value = STATE.busNumber;
+            updateClock(); setInterval(updateClock, 1000);
+            bindEvents();
+            updateSummary();
+            renderList();
+
+            // Initialize Leaflet map
+            STATE.map = L.map('map', { zoomControl: false, attributionControl: false }).setView([40.7128, -74.006], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:19, attribution:'© OpenStreetMap' }).addTo(STATE.map);
+            L.control.zoom({ position:'bottomright' }).addTo(STATE.map);
+
+            await geocodeAll();
+            startGPS();
+            updateMap();
+            zoomToFit();
+            D.status.textContent = 'Ready – GPS initializing';
+        };
+
+        document.addEventListener('DOMContentLoaded', init);
+    })();
+    </script>
+</body>
+</html>
