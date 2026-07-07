@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="mr">
 <head>
@@ -39,7 +40,7 @@
             background: var(--background);
             color: var(--text);
             min-height: 100vh;
-            padding-bottom: calc(var(--safe-bottom) + 100px);
+            padding-bottom: calc(var(--safe-bottom) + 110px);
         }
 
         /* --- Header --- */
@@ -54,10 +55,12 @@
             align-items: center;
             justify-content: space-between;
             box-shadow: var(--shadow);
+            flex-wrap: wrap;
+            gap: 10px;
         }
         .header .logo-area { display: flex; align-items: center; gap: 10px; }
         .header .logo { font-size: 28px; }
-        .header .title h1 { font-size: 1.2rem; font-weight: 800; color: #ffd600; }
+        .header .title h1 { font-size: clamp(1rem, 4vw, 1.2rem); font-weight: 800; color: #ffd600; }
         .header .title p { font-size: 0.8rem; color: var(--text-secondary); }
         
         /* Shift Toggle */
@@ -74,7 +77,7 @@
             border: none;
             background: transparent;
             color: var(--grey);
-            font-size: 0.8rem;
+            font-size: clamp(0.75rem, 3vw, 0.8rem);
             font-weight: bold;
             cursor: pointer;
             display: flex;
@@ -103,7 +106,7 @@
             box-shadow: var(--shadow);
             border: 2px solid var(--border);
         }
-        .summary-card .value { font-size: 2.2rem; font-weight: 900; line-height: 1; }
+        .summary-card .value { font-size: clamp(1.6rem, 6vw, 2.2rem); font-weight: 900; line-height: 1; }
         .summary-card .label { font-size: 0.75rem; color: var(--text-secondary); font-weight: bold; margin-top: 6px; }
         .summary-card.total .value { color: #ffd600; }
         .summary-card.done .value { color: var(--green); }
@@ -115,8 +118,8 @@
             border-radius: var(--radius);
             overflow: hidden;
             box-shadow: var(--shadow-lg);
-            height: 35vh;
-            min-height: 240px;
+            height: 40vh; /* Increased height for better visibility */
+            min-height: 260px;
             position: relative;
             border: 3px solid var(--border);
         }
@@ -146,13 +149,14 @@
             bottom: 12px; left: 12px; right: 12px;
             background: rgba(30, 30, 36, 0.95);
             border-radius: 12px; padding: 10px 14px;
-            font-size: 0.85rem; font-weight: bold;
+            font-size: clamp(0.75rem, 3vw, 0.85rem); 
+            font-weight: bold;
             box-shadow: var(--shadow);
             z-index: 10;
             display: flex; align-items: center; gap: 10px;
             border: 1px solid var(--border);
         }
-        .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--grey); }
+        .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--grey); flex-shrink: 0; }
         .dot.active { background: var(--green); animation: pulse 1.5s infinite; }
         @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(0,230,118,0.5); } 70% { box-shadow: 0 0 0 10px rgba(0,230,118,0); } 100% { box-shadow: 0 0 0 0 rgba(0,230,118,0); } }
 
@@ -163,7 +167,7 @@
             align-items: center;
             padding: 0 16px 10px;
         }
-        .list-header { font-weight: 800; font-size: 1.2rem; color: #ffd600; }
+        .list-header { font-weight: 800; font-size: clamp(1rem, 4vw, 1.2rem); color: #ffd600; }
         .reset-btn-manual {
             background: #263238;
             color: #ff5252;
@@ -173,6 +177,7 @@
             font-size: 0.75rem;
             font-weight: bold;
             cursor: pointer;
+            flex-shrink: 0;
         }
 
         .stops-list { padding: 0 16px; display: flex; flex-direction: column; gap: 14px; }
@@ -192,12 +197,10 @@
             transition: all 0.25s;
         }
         
-        /* NEXT ACTIVE STOP */
+        /* NEXT ACTIVE STOP - Fixed Border Glitch */
         .stop-card.active-next {
-            border-left-color: #ffd600;
-            border-top: 2px solid #ffd600;
-            border-right: 2px solid #ffd600;
-            border-bottom: 2px solid #ffd600;
+            border-color: #ffd600;
+            border-left: 10px solid #ffd600;
             background: #263238;
             animation: cardPulse 3s infinite alternate;
         }
@@ -206,18 +209,18 @@
             100% { box-shadow: 0 4px 20px rgba(255, 214, 0, 0.3); }
         }
 
+        /* DONE STOP - Fixed Border Glitch & Opacity */
         .stop-card.done {
-            border-left-color: var(--green);
+            border-color: rgba(0, 230, 118, 0.3);
+            border-left: 10px solid var(--green);
             background: var(--green-light);
-            border-top: 1px solid rgba(0, 230, 118, 0.3);
-            border-right: 1px solid rgba(0, 230, 118, 0.3);
-            border-bottom: 1px solid rgba(0, 230, 118, 0.3);
-            opacity: 0.65;
+            /* Removed opacity rule to keep text & buttons clear */
         }
         
-        .stop-info { flex: 1; display: flex; flex-direction: column; gap: 6px; }
-        .stop-name-row { display: flex; align-items: center; justify-content: space-between; width: 100%; margin-bottom: 2px; }
-        .stop-name-left { display: flex; align-items: center; gap: 8px; }
+        .stop-info { flex: 1; display: flex; flex-direction: column; gap: 8px; min-width: 0; /* allows text truncation */ }
+        .stop-name-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; width: 100%; }
+        .stop-name-left { display: flex; align-items: flex-start; gap: 10px; flex: 1; min-width: 0; }
+        
         .stop-badge {
             background: var(--border);
             color: #ffd600;
@@ -226,10 +229,19 @@
             display: flex; align-items: center; justify-content: center;
             font-weight: 900;
             font-size: 0.9rem;
+            flex-shrink: 0;
+            margin-top: 2px;
         }
         .stop-card.done .stop-badge { background: var(--green); color: black; }
         
-        .stop-name { font-size: 1.3rem; font-weight: 800; color: white; }
+        .stop-name { 
+            font-size: clamp(1.1rem, 4vw, 1.3rem); 
+            font-weight: 800; 
+            color: white; 
+            word-wrap: break-word; 
+            word-break: break-word; 
+            line-height: 1.2;
+        }
         .stop-card.done .stop-name { text-decoration: line-through; color: var(--grey); }
         
         .stop-details {
@@ -254,6 +266,7 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            flex-shrink: 0;
         }
         
         .call-btn {
@@ -266,6 +279,7 @@
             color: #81d4fa;
             cursor: pointer;
             text-decoration: none;
+            flex-shrink: 0;
         }
         .call-btn:active { background: #455a64; }
 
@@ -278,6 +292,7 @@
             color: white;
             border: none;
             cursor: pointer;
+            flex-shrink: 0;
         }
         .dir-btn:active { background: var(--primary-dark); }
 
@@ -292,13 +307,14 @@
             cursor: pointer;
             display: flex; align-items: center; justify-content: center;
             box-shadow: 0 4px 10px rgba(0, 230, 118, 0.4);
+            flex-shrink: 0;
         }
         .tick-btn:active { transform: scale(0.9); }
         
         .already-done-check {
             width: 50px; height: 50px;
             display: flex; align-items: center; justify-content: center;
-            font-size: 2.2rem;
+            font-size: 1.8rem; /* Reduced to avoid overflow */
             color: var(--green);
         }
 
@@ -316,6 +332,7 @@
             align-items: center;
             gap: 4px;
             transition: all 0.2s;
+            flex-shrink: 0; /* Ensures it doesn't get crushed by long names */
         }
         .del-field-btn:active { background: #ff1744; color: white; }
 
@@ -345,6 +362,8 @@
             border-radius: 30px 30px 0 0; padding: 24px 20px calc(var(--safe-bottom) + 24px);
             animation: slideUp 0.3s ease-out forwards;
             border-top: 4px solid var(--primary);
+            max-height: 90vh;
+            overflow-y: auto;
         }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
         
@@ -355,6 +374,7 @@
             width: 100%; padding: 14px 16px; border-radius: 14px;
             border: 2px solid var(--border); font-size: 1.1rem; outline: none;
             background: #263238; color: white;
+            font-family: inherit;
         }
         .form-input:focus { border-color: var(--primary); }
         
@@ -364,7 +384,7 @@
             font-size: 1.1rem; font-weight: bold; cursor: pointer;
             display: flex; align-items: center; justify-content: center; gap: 10px;
         }
-        .fetch-btn.success { background: var(--green-light); border-color: var(--green); color: var(--green); }
+        .fetch-btn.success { background: var(--green-light); border-color: var(--green); color: var(--green); border-style: solid; }
         
         .modal-actions { display: flex; gap: 14px; margin-top: 28px; }
         .btn-cancel { background: #37474f; color: white; flex: 1; padding: 16px; border-radius: 14px; border: none; font-weight: bold; font-size: 1.1rem; cursor: pointer; }
@@ -378,6 +398,8 @@
             font-weight: 800; box-shadow: 0 8px 24px rgba(0,0,0,0.4);
             animation: fadeInOut 2.8s forwards; pointer-events: none;
             display: flex; align-items: center; gap: 8px;
+            width: max-content;
+            max-width: 90vw;
         }
         @keyframes fadeInOut { 0% { opacity:0; top:0; } 15% { opacity:1; top:24px; } 85% { opacity:1; top:24px; } 100% { opacity:0; top:0; } }
     </style>
@@ -529,11 +551,11 @@
             const lastSavedDate = localStorage.getItem('lastOpenedDate');
 
             if (lastSavedDate && lastSavedDate !== todayKey) {
-                STATE.stops.forEach(stop => {
-                    stop.status = 'pending';
-                });
-                saveData();
-                showToast("🌅 शुभ सकाळ! आजचे सर्व थांबे आपोआप रीसेट झाले आहेत.");
+                if (STATE.stops.length > 0) {
+                    STATE.stops.forEach(stop => { stop.status = 'pending'; });
+                    saveData();
+                    showToast("🌅 शुभ सकाळ! आजचे सर्व थांबे आपोआप रीसेट झाले आहेत.");
+                }
             }
             localStorage.setItem('lastOpenedDate', todayKey);
         }
@@ -750,7 +772,6 @@
 
                 card.innerHTML = `
                     <div class="stop-info">
-                        <!-- Top field row with name and a safe explicit delete field button -->
                         <div class="stop-name-row">
                             <div class="stop-name-left">
                                 <div class="stop-badge">${index + 1}</div>
