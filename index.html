@@ -5,12 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>मराठी बस ट्रॅकर</title>
-
-    <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
     <style>
-        /* ----- All existing styles remain exactly the same ----- */
+        /* ===== All existing styles stay exactly the same ===== */
         :root {
             --primary: #2979ff;
             --primary-dark: #1565c0;
@@ -61,9 +59,9 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            box-shadow: var(--shadow);
             flex-wrap: wrap;
             gap: 10px;
+            box-shadow: var(--shadow);
         }
         .header .logo-area {
             display: flex;
@@ -229,7 +227,7 @@
             }
         }
 
-        /* Backup section – same styles as before */
+        /* Backup & Sync section */
         .backup-section {
             margin: 0 16px 16px;
             background: var(--surface);
@@ -273,6 +271,10 @@
             border-color: #ffd600;
             animation: pulseText 1s infinite alternate;
         }
+        .backup-status.cloud {
+            color: #82b1ff;
+            border-color: #82b1ff;
+        }
         @keyframes pulseText {
             0% {
                 opacity: 0.6;
@@ -289,12 +291,12 @@
         }
         .backup-btn {
             flex: 1 0 auto;
-            min-width: 80px;
+            min-width: 70px;
             padding: 10px 14px;
             border-radius: 12px;
             border: none;
             font-weight: 700;
-            font-size: clamp(0.75rem, 2.5vw, 0.85rem);
+            font-size: clamp(0.7rem, 2.5vw, 0.85rem);
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -331,6 +333,14 @@
         }
         .backup-btn.cloud-btn:active {
             background: rgba(0, 230, 118, 0.20);
+        }
+        .backup-btn.sync-btn {
+            background: rgba(255, 152, 0, 0.12);
+            color: #ffb74d;
+            border-color: rgba(255, 152, 0, 0.25);
+        }
+        .backup-btn.sync-btn:active {
+            background: rgba(255, 152, 0, 0.25);
         }
         .backup-btn:disabled {
             opacity: 0.4;
@@ -757,8 +767,8 @@
         @media (max-width: 480px) {
             .backup-actions .backup-btn {
                 flex: 1 0 calc(50% - 4px);
-                font-size: 0.7rem;
-                padding: 8px 6px;
+                font-size: 0.65rem;
+                padding: 8px 4px;
             }
             .backup-btn .btn-label {
                 display: none;
@@ -831,7 +841,7 @@
         </div>
     </div>
 
-    <!-- ===== BACKUP & RESTORE (with Firebase integration) ===== -->
+    <!-- ===== BACKUP & SYNC SECTION (NEW: added Sync button) ===== -->
     <div class="backup-section" id="backupSection">
         <div class="backup-header">
             <span class="title">📦 डेटा व्यवस्थापन</span>
@@ -839,13 +849,17 @@
         </div>
         <div class="backup-actions">
             <button class="backup-btn export-btn" onclick="exportBackup()">
-                <span class="btn-icon">📤</span><span class="btn-label">बॅकअप घ्या</span>
+                <span class="btn-icon">📤</span><span class="btn-label">बॅकअप</span>
             </button>
             <button class="backup-btn import-btn" onclick="document.getElementById('importInput').click()">
-                <span class="btn-icon">📥</span><span class="btn-label">बॅकअप आणा</span>
+                <span class="btn-icon">📥</span><span class="btn-label">आणा</span>
             </button>
             <button class="backup-btn cloud-btn" id="cloudUploadBtn" onclick="uploadToBackend()">
-                <span class="btn-icon">☁️</span><span class="btn-label">क्लाउडवर पाठवा</span>
+                <span class="btn-icon">☁️⬆</span><span class="btn-label">अपलोड</span>
+            </button>
+            <!-- NEW: Sync from Cloud button -->
+            <button class="backup-btn sync-btn" id="syncBtn" onclick="syncFromCloud()">
+                <span class="btn-icon">🔄</span><span class="btn-label">सिंक करा</span>
             </button>
             <input type="file" id="importInput" accept=".json" onchange="importBackup(event)">
         </div>
@@ -889,12 +903,11 @@
         </div>
     </div>
 
-    <!-- ===== LEaFLET JS ===== -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- ===== Leaflet JS ===== -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+    </script>
 
-    <!-- ============================================================== -->
-    <!--  FIREBASE SDK (compat) – added for backend integration          -->
-    <!-- ============================================================== -->
+    <!-- ===== FIREBASE SDK ===== -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js">
     </script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js">
@@ -902,9 +915,8 @@
 
     <script>
         // ================================================================
-        //  FIREBASE INITIALIZATION (using the config provided)
+        //  FIREBASE INIT
         // ================================================================
-
         const firebaseConfig = {
             apiKey: "AIzaSyD9RuHVEVYey9YaRDJVDOo5A6iZxolHP2U",
             authDomain: "busroute-859b9.firebaseapp.com",
@@ -918,26 +930,26 @@
         let firebaseApp = null;
         let firestore = null;
         let firebaseInitialized = false;
+        let firebaseInitError = null;
 
         try {
             firebaseApp = firebase.initializeApp(firebaseConfig);
             firestore = firebase.firestore();
-            // Enable offline persistence so the app works even when offline
             firestore.enablePersistence({ synchronizeTabs: true })
                 .catch(function(err) {
-                    console.warn('Firestore persistence error (non-critical):', err);
+                    console.warn('Firestore persistence warning:', err);
                 });
             firebaseInitialized = true;
-            console.log('Firebase initialized successfully.');
+            console.log('✅ Firebase initialized.');
         } catch (e) {
-            console.error('Firebase initialization failed:', e);
+            console.error('❌ Firebase init failed:', e);
             firebaseInitialized = false;
+            firebaseInitError = e.message;
         }
 
         // ================================================================
-        //  EXISTING STATE & BUSINESS LOGIC (unchanged)
+        //  STATE & CORE LOGIC (unchanged)
         // ================================================================
-
         const STATE = {
             stops: [],
             driverPos: null,
@@ -954,25 +966,32 @@
             if (saved) {
                 try { STATE.stops = JSON.parse(saved); } catch (e) { STATE.stops = []; }
             }
-
             const savedShift = localStorage.getItem('schoolBusShift');
             if (savedShift) {
                 STATE.currentShift = savedShift;
                 setShiftUI(savedShift);
             }
-
             const now = new Date();
             const dateStr = now.toLocaleDateString('mr-IN', { weekday: 'long', day: 'numeric', month: 'long',
                     year: 'numeric' });
             document.getElementById('liveDate').textContent = dateStr;
-
             checkDailyReset();
             initMap();
             startGPS();
             updateUI();
 
-            // Run migration (auto-upload to Firebase if not yet done)
-            runMigration();
+            // Run migration & then auto-sync from cloud
+            runMigration().then(() => {
+                // After migration check, attempt to sync from cloud if Firebase is available
+                if (firebaseInitialized) {
+                    autoSyncFromCloud();
+                }
+            }).catch(() => {
+                // Migration failed or errored — still try to sync
+                if (firebaseInitialized) {
+                    autoSyncFromCloud();
+                }
+            });
         }
 
         function checkDailyReset() {
@@ -1020,7 +1039,7 @@
             }
         }
 
-        // --- Map Logic ---
+        // --- Map ---
         function initMap() {
             STATE.map = L.map('map', { zoomControl: false, attributionControl: false }).setView([18.6279, 73.8009],
             13);
@@ -1035,7 +1054,6 @@
                 STATE.map.removeLayer(STATE.routeLine);
                 STATE.routeLine = null;
             }
-
             const points = [];
             if (STATE.driverPos) {
                 points.push([STATE.driverPos.lat, STATE.driverPos.lng]);
@@ -1054,10 +1072,8 @@
                     fillOpacity: 1
                 }).addTo(STATE.markerLayer);
             }
-
             const displayStops = [...STATE.stops];
             if (STATE.currentShift === 'afternoon') displayStops.reverse();
-
             displayStops.forEach((stop, i) => {
                 const isDone = stop.status === 'completed';
                 const color = isDone ? '#9aa0a6' : (i === getNextPendingIndex(displayStops) ? '#ffd600' :
@@ -1071,7 +1087,6 @@
                     .bindPopup(`<b>${stop.name}</b><br>${isDone ? 'झाला ✔' : 'बाकी ⏳'}`);
                 if (!isDone) points.push([stop.coords.lat, stop.coords.lng]);
             });
-
             if (points.length > 1) {
                 STATE.routeLine = L.polyline(points, { color: '#ffd600', weight: 5, dashArray: '8, 8',
                         opacity: 0.8 }).addTo(STATE.map);
@@ -1098,7 +1113,7 @@
             if (bounds.length > 0) STATE.map.fitBounds(bounds, { padding: [40, 40] });
         }
 
-        // --- GPS Watcher ---
+        // --- GPS ---
         function startGPS() {
             const ind = document.getElementById('gpsIndicator');
             const txt = document.getElementById('gpsText');
@@ -1110,14 +1125,14 @@
                 (pos) => {
                     STATE.driverPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
                     ind.className = 'dot active';
-                    txt.textContent = "जीपीएस कनेक्टेड 🟢 (चालू जागा)";
+                    txt.textContent = "जीपीएस कनेक्टेड 🟢";
                     updateMapElements();
                     updateListDistances();
                 },
                 (err) => {
                     ind.className = 'dot';
                     let errorMsg = "GPS बंद आहे! कृपया Location चालू करा 🔴";
-                    if (err.code === 1) errorMsg = "GPS परमिशन नाकारली! Location चालू करा 🔴";
+                    if (err.code === 1) errorMsg = "GPS परमिशन नाकारली! 🔴";
                     txt.textContent = errorMsg;
                 }, { enableHighAccuracy: true, maximumAge: 3000, timeout: 15000 }
             );
@@ -1127,14 +1142,14 @@
             const R = 6371;
             const dLat = (lat2 - lat1) * Math.PI / 180;
             const dLon = (lon2 - lon1) * Math.PI / 180;
-            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(
+                dLon / 2) ** 2;
             const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
             const d = R * c;
             return d < 1 ? Math.round(d * 1000) + ' मी' : d.toFixed(1) + ' किमी';
         }
 
-        // --- Driver UI Rendering ---
+        // --- UI rendering ---
         function updateUI() {
             const total = STATE.stops.length;
             const done = STATE.stops.filter(s => s.status === 'completed').length;
@@ -1146,9 +1161,9 @@
             listDiv.innerHTML = '';
             if (total === 0) {
                 listDiv.innerHTML =
-                    `<div style="text-align:center; padding: 40px 20px; color: var(--grey); background: var(--surface); border-radius: var(--radius); border: 2px dashed var(--border);">
-                        <p style="font-size: 1.2rem; font-weight: bold; margin-bottom: 8px;">एकूण शून्य थांबे</p>
-                        <p style="font-size: 0.9rem;">नवीन थांबा जोडण्यासाठी खालील पिवळे (+) बटण दाबा.</p>
+                    `<div style="text-align:center; padding:40px 20px; color:var(--grey); background:var(--surface); border-radius:var(--radius); border:2px dashed var(--border);">
+                        <p style="font-size:1.2rem; font-weight:bold; margin-bottom:8px;">एकूण शून्य थांबे</p>
+                        <p style="font-size:0.9rem;">नवीन थांबा जोडण्यासाठी खालील पिवळे (+) बटण दाबा.</p>
                     </div>`;
                 updateMapElements();
                 return;
@@ -1156,7 +1171,6 @@
 
             const displayStops = [...STATE.stops];
             if (STATE.currentShift === 'afternoon') displayStops.reverse();
-
             const nextPendingIndex = getNextPendingIndex(displayStops);
 
             displayStops.forEach((stop, index) => {
@@ -1173,9 +1187,9 @@
                 if (!isDone) {
                     actionBtnHTML = `
                         <div class="stop-action-btns">
-                            ${stop.phone ? `<a href="tel:${stop.phone}" class="call-btn" title="फोन लावा">📞</a>` : ''}
-                            <button class="dir-btn" onclick="openNavMap(${stop.coords.lat}, ${stop.coords.lng})" title="मार्ग">🧭</button>
-                            <button class="tick-btn" onclick="markDone('${stop.id}')" title="झाले">✔</button>
+                            ${stop.phone ? `<a href="tel:${stop.phone}" class="call-btn">📞</a>` : ''}
+                            <button class="dir-btn" onclick="openNavMap(${stop.coords.lat}, ${stop.coords.lng})">🧭</button>
+                            <button class="tick-btn" onclick="markDone('${stop.id}')">✔</button>
                         </div>
                     `;
                 } else {
@@ -1190,13 +1204,13 @@
                                 <div class="stop-badge">${index + 1}</div>
                                 <div class="stop-name">${stop.name}</div>
                             </div>
-                            <button class="del-field-btn" onclick="deleteStop('${stop.id}')" title="थांबा काढून टाका">🗑️ काढा</button>
+                            <button class="del-field-btn" onclick="deleteStop('${stop.id}')">🗑️ काढा</button>
                         </div>
                         <div class="stop-details">
                             <span class="dist-badge class-dist" data-lat="${stop.coords.lat}" data-lng="${stop.coords.lng}">
                                 📍 ${distStr} लांब
                             </span>
-                            <span style="color: var(--grey); font-weight: bold; font-size: 0.8rem;">${travelIcon}</span>
+                            <span style="color:var(--grey); font-weight:bold; font-size:0.8rem;">${travelIcon}</span>
                         </div>
                     </div>
                     ${actionBtnHTML}
@@ -1308,7 +1322,6 @@
         // ================================================================
         //  BACKUP & RESTORE (Export / Import) – unchanged
         // ================================================================
-
         const APP_STORAGE_KEYS = [
             'schoolBusStopsData',
             'schoolBusShift',
@@ -1414,37 +1427,29 @@
         }
 
         // ================================================================
-        //  FIREBASE UPLOAD FUNCTION (replaces generic BACKEND_CONFIG)
+        //  UPLOAD TO CLOUD (push local data to Firebase)
         // ================================================================
-
-        /**
-         * Upload all stops to Firestore.
-         * - If called without data, uploads the entire current STATE.stops.
-         * - If called with data (for migration), uploads that data.
-         * - Each stop is stored as a document in collection "stops".
-         * - Also stores a meta document "app_meta" with last upload time and count.
-         * - Handles offline errors gracefully.
-         */
         function uploadToBackend(dataToSend, callback) {
             const btn = document.getElementById('cloudUploadBtn');
             const originalHTML = btn.innerHTML;
 
-            // Check Firebase availability
             if (!firebaseInitialized) {
-                showToast('⚠️ Firebase उपलब्ध नाही. कृपया इंटरनेट कनेक्शन तपासा.', 'error');
+                let errMsg = '⚠️ Firebase उपलब्ध नाही. ';
+                if (firebaseInitError) errMsg += 'कारण: ' + firebaseInitError;
+                else errMsg += 'कृपया इंटरनेट कनेक्शन तपासा.';
+                showToast(errMsg, 'error');
                 setBackupStatus('error', '❌ Firebase नाही');
                 if (callback) callback(false);
                 return Promise.reject(new Error('Firebase not initialized'));
             }
 
-            // Determine what to upload
             let stopsToUpload;
             if (dataToSend && Array.isArray(dataToSend)) {
-                stopsToUpload = dataToSend; // called from migration with stops array
+                stopsToUpload = dataToSend;
             } else if (dataToSend && dataToSend.stops) {
                 stopsToUpload = dataToSend.stops;
             } else {
-                stopsToUpload = STATE.stops; // manual upload
+                stopsToUpload = STATE.stops;
             }
 
             if (!stopsToUpload || stopsToUpload.length === 0) {
@@ -1453,74 +1458,60 @@
                 return Promise.reject(new Error('No stops to upload'));
             }
 
-            // Update UI
-            setBackupStatus('syncing', '⏳ अपलोड करत आहे...');
+            setBackupStatus('syncing', `⏳ अपलोड (${stopsToUpload.length})...`);
             btn.disabled = true;
             btn.innerHTML = '<span class="btn-icon">⏳</span><span class="btn-label">अपलोड...</span>';
 
-            // Prepare batch writes (max 500 per batch)
             const batchSize = 500;
             const batches = [];
             for (let i = 0; i < stopsToUpload.length; i += batchSize) {
-                const chunk = stopsToUpload.slice(i, i + batchSize);
-                batches.push(chunk);
+                batches.push(stopsToUpload.slice(i, i + batchSize));
             }
 
-            // We'll upload each batch sequentially using Promise chaining
-            let uploadPromises = [];
             let uploadedCount = 0;
+            let totalBatches = batches.length;
+            let currentBatch = 0;
 
-            // Helper to upload a single batch
-            function uploadBatch(batchStops, batchIndex) {
+            function uploadBatch(batchStops) {
                 return new Promise((resolve, reject) => {
                     const batch = firestore.batch();
                     const collectionRef = firestore.collection('stops');
-
                     batchStops.forEach(stop => {
-                        // Use stop.id as document ID to avoid duplicates
                         const docRef = collectionRef.doc(stop.id);
-                        // Prepare data (convert coords to GeoPoint for Firestore)
                         const data = {
                             name: stop.name,
                             phone: stop.phone || '',
                             status: stop.status,
                             lat: stop.coords.lat,
                             lng: stop.coords.lng,
-                            // Store as GeoPoint if needed, but we keep lat/lng for flexibility
-                            // Also store timestamp
                             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                         };
                         batch.set(docRef, data, { merge: true });
                     });
-
-                    // Also update a meta document with total count
                     const metaRef = firestore.collection('app_meta').doc('upload_status');
                     batch.set(metaRef, {
                         lastUploadTime: firebase.firestore.FieldValue.serverTimestamp(),
                         totalStops: stopsToUpload.length,
                         uploadedStops: firebase.firestore.FieldValue.increment(batchStops.length)
                     }, { merge: true });
-
-                    batch.commit()
-                        .then(() => {
-                            uploadedCount += batchStops.length;
-                            resolve();
-                        })
-                        .catch(err => {
-                            reject(err);
-                        });
+                    batch.commit().then(() => {
+                        uploadedCount += batchStops.length;
+                        resolve();
+                    }).catch(err => reject(err));
                 });
             }
 
-            // Execute batches sequentially
             let promiseChain = Promise.resolve();
             batches.forEach((chunk, idx) => {
-                promiseChain = promiseChain.then(() => uploadBatch(chunk, idx));
+                promiseChain = promiseChain.then(() => {
+                    currentBatch = idx + 1;
+                    setBackupStatus('syncing', `⏳ अपलोड ${currentBatch}/${totalBatches}...`);
+                    return uploadBatch(chunk);
+                });
             });
 
             return promiseChain
                 .then(() => {
-                    // Success
                     setBackupStatus('success', `✅ ${uploadedCount} थांबे अपलोड`);
                     showToast(`☁️ ${uploadedCount} थांबे यशस्वीरित्या क्लाउडवर पाठवले गेले!`, 'success');
                     if (callback) callback(true, { uploaded: uploadedCount });
@@ -1529,11 +1520,19 @@
                     return { uploaded: uploadedCount };
                 })
                 .catch(err => {
-                    console.error('Upload error:', err);
+                    console.error('❌ Upload error:', err);
                     setBackupStatus('error', '❌ अपलोड अयशस्वी');
                     let msg = 'क्लाउडवर पाठवताना त्रुटी. ';
-                    if (err.message) msg += err.message;
-                    else msg += 'कृपया इंटरनेट कनेक्शन तपासा.';
+                    if (err.message) {
+                        msg += err.message;
+                        if (err.message.includes('permission')) {
+                            msg += ' (कृपया Firestore security rules तपासा)';
+                        } else if (err.message.includes('network')) {
+                            msg += ' (इंटरनेट कनेक्शन तपासा)';
+                        }
+                    } else {
+                        msg += 'कृपया इंटरनेट कनेक्शन तपासा.';
+                    }
                     showToast('⚠️ ' + msg, 'error');
                     if (callback) callback(false, err);
                     btn.disabled = false;
@@ -1543,60 +1542,236 @@
         }
 
         // ================================================================
-        //  MIGRATION SYSTEM – now uses Firebase
+        //  SYNC FROM CLOUD (pull data from Firebase to local)
+        //  This is the NEW function that makes data visible on other phones
+        // ================================================================
+
+        /**
+         * syncFromCloud - Fetches all stops from Firestore and updates localStorage.
+         * This makes data uploaded by one device visible on another.
+         * - If local has no data, it auto-fills.
+         * - If local has data, it asks the user before overwriting.
+         * - Returns a Promise that resolves with the number of stops synced.
+         */
+        function syncFromCloud(showToastMessage = true) {
+            if (!firebaseInitialized) {
+                let errMsg = '⚠️ Firebase उपलब्ध नाही. ';
+                if (firebaseInitError) errMsg += 'कारण: ' + firebaseInitError;
+                else errMsg += 'कृपया इंटरनेट कनेक्शन तपासा.';
+                if (showToastMessage) showToast(errMsg, 'error');
+                setBackupStatus('error', '❌ Firebase नाही');
+                return Promise.reject(new Error('Firebase not initialized'));
+            }
+
+            const syncBtn = document.getElementById('syncBtn');
+            const originalHTML = syncBtn.innerHTML;
+
+            // Check if local data exists
+            const localData = localStorage.getItem('schoolBusStopsData');
+            let localStops = [];
+            if (localData) {
+                try { localStops = JSON.parse(localData); } catch (_) { localStops = []; }
+            }
+
+            // If local has data, ask for confirmation before overwriting
+            if (localStops.length > 0 && showToastMessage) {
+                if (!confirm(
+                        '⚠️ तुमच्या फोनवर आधीच ' + localStops.length + ' थांबे आहेत.\n\n' +
+                        'क्लाउडवरून डेटा आणल्यास हा सर्व स्थानिक डेटा ओव्हरराईट होईल.\n\n' +
+                        'तुम्हाला खात्री आहे का?'
+                    )) {
+                    showToast('सिंक रद्द केली.', 'error');
+                    return Promise.reject(new Error('Sync cancelled by user'));
+                }
+            }
+
+            setBackupStatus('syncing', '⏳ क्लाउडवरून आणत आहे...');
+            syncBtn.disabled = true;
+            syncBtn.innerHTML = '<span class="btn-icon">⏳</span><span class="btn-label">आणत आहे...</span>';
+
+            // Fetch all documents from 'stops' collection
+            return firestore.collection('stops').get()
+                .then((querySnapshot) => {
+                    const cloudStops = [];
+                    querySnapshot.forEach((doc) => {
+                        const data = doc.data();
+                        // Reconstruct the stop object with coords
+                        cloudStops.push({
+                            id: doc.id,
+                            name: data.name || 'अज्ञात थांबा',
+                            phone: data.phone || '',
+                            status: data.status || 'pending',
+                            coords: {
+                                lat: data.lat || 0,
+                                lng: data.lng || 0
+                            }
+                        });
+                    });
+
+                    if (cloudStops.length === 0) {
+                        setBackupStatus('cloud', '☁️ क्लाउडवर कोणताही डेटा नाही');
+                        if (showToastMessage) showToast('📭 क्लाउडवर कोणतेही थांबे नाहीत.', 'error');
+                        syncBtn.disabled = false;
+                        syncBtn.innerHTML = originalHTML;
+                        return { synced: 0 };
+                    }
+
+                    // Update localStorage with cloud data
+                    localStorage.setItem('schoolBusStopsData', JSON.stringify(cloudStops));
+                    // Update STATE
+                    STATE.stops = cloudStops;
+
+                    // Also update shift if present in meta
+                    firestore.collection('app_meta').doc('upload_status').get()
+                        .then((metaDoc) => {
+                            if (metaDoc.exists && metaDoc.data().shift) {
+                                const shift = metaDoc.data().shift;
+                                localStorage.setItem('schoolBusShift', shift);
+                                STATE.currentShift = shift;
+                                setShiftUI(shift);
+                            }
+                        })
+                        .catch(() => { /* ignore meta errors */ });
+
+                    // Refresh UI
+                    updateUI();
+                    setBackupStatus('success', `✅ ${cloudStops.length} थांबे सिंक झाले`);
+                    if (showToastMessage) {
+                        showToast(`🔄 ${cloudStops.length} थांबे क्लाउडवरून यशस्वीरित्या आणले गेले!`, 'success');
+                    }
+                    syncBtn.disabled = false;
+                    syncBtn.innerHTML = originalHTML;
+                    return { synced: cloudStops.length };
+                })
+                .catch((err) => {
+                    console.error('❌ Sync error:', err);
+                    setBackupStatus('error', '❌ सिंक अयशस्वी');
+                    let msg = 'क्लाउडवरून डेटा आणताना त्रुटी. ';
+                    if (err.message) {
+                        msg += err.message;
+                        if (err.message.includes('permission')) {
+                            msg += ' (कृपया Firestore security rules तपासा)';
+                        } else if (err.message.includes('network')) {
+                            msg += ' (इंटरनेट कनेक्शन तपासा)';
+                        }
+                    } else {
+                        msg += 'कृपया इंटरनेट कनेक्शन तपासा.';
+                    }
+                    if (showToastMessage) showToast('⚠️ ' + msg, 'error');
+                    syncBtn.disabled = false;
+                    syncBtn.innerHTML = originalHTML;
+                    throw err;
+                });
+        }
+
+        /**
+         * autoSyncFromCloud - Called on app launch.
+         * Only auto-syncs if local has NO data (fresh install) or if the user
+         * has explicitly allowed it via the flag.
+         * This avoids accidental data loss on launch.
+         */
+        function autoSyncFromCloud() {
+            // Check if local has data
+            const localData = localStorage.getItem('schoolBusStopsData');
+            let localStops = [];
+            if (localData) {
+                try { localStops = JSON.parse(localData); } catch (_) { localStops = []; }
+            }
+
+            // Only auto-sync if local is empty (fresh install on new device)
+            if (localStops.length === 0) {
+                console.log('🔄 Auto-sync: No local data, pulling from cloud...');
+                setBackupStatus('syncing', '⏳ क्लाउडवरून आणत आहे...');
+                syncFromCloud(false)
+                    .then((result) => {
+                        if (result.synced > 0) {
+                            showToast(`🔄 ${result.synced} थांबे क्लाउडवरून आपोआप आणले गेले!`, 'success');
+                        }
+                    })
+                    .catch(() => {
+                        // Silent fail for auto-sync
+                        console.log('Auto-sync failed (silent).');
+                        setBackupStatus('error', '⚠️ ऑटो-सिंक अयशस्वी');
+                    });
+            } else {
+                console.log('📱 Local data exists (' + localStops.length + ' stops). Skipping auto-sync.');
+                // Still check cloud count and show a hint if cloud has more data
+                if (firebaseInitialized) {
+                    firestore.collection('stops').get()
+                        .then((snapshot) => {
+                            const cloudCount = snapshot.size;
+                            if (cloudCount > localStops.length) {
+                                setBackupStatus('cloud',
+                                    `☁️ क्लाउडवर ${cloudCount} थांबे (${localStops.length} स्थानिक) — "सिंक करा" दाबा`);
+                            } else {
+                                setBackupStatus('success', `✅ ${localStops.length} थांबे`);
+                            }
+                        })
+                        .catch(() => {
+                            setBackupStatus('success', `✅ ${localStops.length} थांबे`);
+                        });
+                }
+            }
+        }
+
+        // ================================================================
+        //  MIGRATION SYSTEM
         // ================================================================
 
         const MIGRATION_KEY = 'schoolBusMigrationCompleted';
 
         function runMigration() {
-            const migrationDone = localStorage.getItem(MIGRATION_KEY);
-            if (migrationDone === 'true') {
-                setBackupStatus('success', '✅ सर्व व्यवस्थित');
-                return;
-            }
-
-            const stopsData = localStorage.getItem('schoolBusStopsData');
-            if (!stopsData) {
-                localStorage.setItem(MIGRATION_KEY, 'true');
-                setBackupStatus('success', '✅ सर्व व्यवस्थित');
-                return;
-            }
-
-            let stops;
-            try { stops = JSON.parse(stopsData); } catch (_) { stops = []; }
-            if (!Array.isArray(stops) || stops.length === 0) {
-                localStorage.setItem(MIGRATION_KEY, 'true');
-                setBackupStatus('success', '✅ सर्व व्यवस्थित');
-                return;
-            }
-
-            // Data exists and migration not done – attempt upload
-            setBackupStatus('syncing', '⏳ मायग्रेशन चालू आहे...');
-            console.log(`🔄 Migration: uploading ${stops.length} stops to Firebase...`);
-
-            // Check Firebase availability
-            if (!firebaseInitialized) {
-                setBackupStatus('error', '⚠️ Firebase नाही, पुन्हा प्रयत्न करा');
-                console.warn('Migration: Firebase not available. Will retry.');
-                return;
-            }
-
-            // Upload the stops via the same function
-            uploadToBackend(stops, (success, result) => {
-                if (success) {
-                    localStorage.setItem(MIGRATION_KEY, 'true');
-                    setBackupStatus('success', '✅ मायग्रेशन पूर्ण');
-                    showToast(`✅ ${stops.length} थांबे क्लाउडवर बॅकअप झाले!`, 'success');
-                    console.log('✅ Migration completed successfully.');
-                } else {
-                    setBackupStatus('error', '⚠️ मायग्रेशन अयशस्वी, पुन्हा प्रयत्न करा');
-                    console.warn('Migration failed. Will retry on next launch.');
-                    // Do not set MIGRATION_KEY – retry next time
+            return new Promise((resolve, reject) => {
+                const migrationDone = localStorage.getItem(MIGRATION_KEY);
+                if (migrationDone === 'true') {
+                    setBackupStatus('success', '✅ सर्व व्यवस्थित');
+                    resolve();
+                    return;
                 }
+
+                const stopsData = localStorage.getItem('schoolBusStopsData');
+                if (!stopsData) {
+                    localStorage.setItem(MIGRATION_KEY, 'true');
+                    setBackupStatus('success', '✅ सर्व व्यवस्थित');
+                    resolve();
+                    return;
+                }
+
+                let stops;
+                try { stops = JSON.parse(stopsData); } catch (_) { stops = []; }
+                if (!Array.isArray(stops) || stops.length === 0) {
+                    localStorage.setItem(MIGRATION_KEY, 'true');
+                    setBackupStatus('success', '✅ सर्व व्यवस्थित');
+                    resolve();
+                    return;
+                }
+
+                setBackupStatus('syncing', '⏳ मायग्रेशन चालू आहे...');
+                console.log(`🔄 Migration: uploading ${stops.length} stops to Firebase...`);
+
+                if (!firebaseInitialized) {
+                    setBackupStatus('error', '⚠️ Firebase नाही, पुन्हा प्रयत्न करा');
+                    resolve(); // Don't block, retry next time
+                    return;
+                }
+
+                uploadToBackend(stops, (success, result) => {
+                    if (success) {
+                        localStorage.setItem(MIGRATION_KEY, 'true');
+                        setBackupStatus('success', '✅ मायग्रेशन पूर्ण');
+                        showToast(`✅ ${stops.length} थांबे क्लाउडवर बॅकअप झाले!`, 'success');
+                        console.log('✅ Migration completed.');
+                        resolve();
+                    } else {
+                        setBackupStatus('error', '⚠️ मायग्रेशन अयशस्वी, पुन्हा प्रयत्न करा');
+                        console.warn('Migration failed. Will retry.');
+                        resolve(); // Resolve anyway, app continues
+                    }
+                });
             });
         }
 
-        // Helper to update the backup status badge
+        // Helper to update status badge
         function setBackupStatus(type, message) {
             const el = document.getElementById('backupStatus');
             if (!el) return;
@@ -1604,6 +1779,7 @@
             if (type === 'success') el.classList.add('success');
             else if (type === 'error') el.classList.add('error');
             else if (type === 'syncing') el.classList.add('syncing');
+            else if (type === 'cloud') el.classList.add('cloud');
             el.textContent = message;
         }
 
