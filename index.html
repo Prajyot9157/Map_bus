@@ -8,13 +8,14 @@
 
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    
+
     <style>
+        /* ----- All existing styles remain exactly the same ----- */
         :root {
             --primary: #2979ff;
             --primary-dark: #1565c0;
             --primary-light: #e3f2fd;
-            --surface: #1e1e24; 
+            --surface: #1e1e24;
             --background: #121214;
             --green: #00e676;
             --green-light: rgba(0, 230, 118, 0.15);
@@ -25,16 +26,23 @@
             --text: #ffffff;
             --text-secondary: #cfd8dc;
             --border: #37474f;
-            --shadow: 0 4px 12px rgba(0,0,0,0.3);
-            --shadow-lg: 0 12px 36px rgba(0,0,0,0.5);
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            --shadow-lg: 0 12px 36px rgba(0, 0, 0, 0.5);
             --radius: 20px;
             --radius-sm: 12px;
             --safe-bottom: env(safe-area-inset-bottom, 16px);
         }
-        
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        html { font-size: 16px; -webkit-tap-highlight-color: transparent; }
-        
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        html {
+            font-size: 16px;
+            -webkit-tap-highlight-color: transparent;
+        }
+
         body {
             font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: var(--background);
@@ -43,7 +51,6 @@
             padding-bottom: calc(var(--safe-bottom) + 110px);
         }
 
-        /* --- Header --- */
         .header {
             background: var(--surface);
             padding: 14px 16px;
@@ -58,12 +65,24 @@
             flex-wrap: wrap;
             gap: 10px;
         }
-        .header .logo-area { display: flex; align-items: center; gap: 10px; }
-        .header .logo { font-size: 28px; }
-        .header .title h1 { font-size: clamp(1rem, 4vw, 1.2rem); font-weight: 800; color: #ffd600; }
-        .header .title p { font-size: 0.8rem; color: var(--text-secondary); }
-        
-        /* Shift Toggle */
+        .header .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .header .logo {
+            font-size: 28px;
+        }
+        .header .title h1 {
+            font-size: clamp(1rem, 4vw, 1.2rem);
+            font-weight: 800;
+            color: #ffd600;
+        }
+        .header .title p {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
         .shift-toggle {
             display: flex;
             background: #263238;
@@ -91,7 +110,6 @@
             box-shadow: var(--shadow);
         }
 
-        /* --- Summary Cards --- */
         .summary-row {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -106,68 +124,233 @@
             box-shadow: var(--shadow);
             border: 2px solid var(--border);
         }
-        .summary-card .value { font-size: clamp(1.6rem, 6vw, 2.2rem); font-weight: 900; line-height: 1; }
-        .summary-card .label { font-size: 0.75rem; color: var(--text-secondary); font-weight: bold; margin-top: 6px; }
-        .summary-card.total .value { color: #ffd600; }
-        .summary-card.done .value { color: var(--green); }
-        .summary-card.left .value { color: var(--orange); }
+        .summary-card .value {
+            font-size: clamp(1.6rem, 6vw, 2.2rem);
+            font-weight: 900;
+            line-height: 1;
+        }
+        .summary-card .label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-weight: bold;
+            margin-top: 6px;
+        }
+        .summary-card.total .value {
+            color: #ffd600;
+        }
+        .summary-card.done .value {
+            color: var(--green);
+        }
+        .summary-card.left .value {
+            color: var(--orange);
+        }
 
-        /* --- Map Area --- */
         .map-container {
             margin: 0 16px 16px;
             border-radius: var(--radius);
             overflow: hidden;
             box-shadow: var(--shadow-lg);
-            height: 40vh; /* Increased height for better visibility */
+            height: 40vh;
             min-height: 260px;
             position: relative;
             border: 3px solid var(--border);
         }
-        #map { width: 100%; height: 100%; z-index: 1; }
-        
+        #map {
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
         .map-overlay-btns {
             position: absolute;
-            top: 12px; right: 12px;
+            top: 12px;
+            right: 12px;
             z-index: 10;
-            display: flex; flex-direction: column; gap: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
         .map-btn {
-            width: 46px; height: 46px;
+            width: 46px;
+            height: 46px;
             border-radius: 50%;
             background: var(--surface);
             border: 2px solid var(--border);
             box-shadow: var(--shadow);
             font-size: 1.4rem;
-            display: flex; align-items: center; justify-content: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
             color: white;
         }
-        .map-btn:active { transform: scale(0.9); background: #263238; }
-        
+        .map-btn:active {
+            transform: scale(0.9);
+            background: #263238;
+        }
+
         .gps-status {
             position: absolute;
-            bottom: 12px; left: 12px; right: 12px;
+            bottom: 12px;
+            left: 12px;
+            right: 12px;
             background: rgba(30, 30, 36, 0.95);
-            border-radius: 12px; padding: 10px 14px;
-            font-size: clamp(0.75rem, 3vw, 0.85rem); 
+            border-radius: 12px;
+            padding: 10px 14px;
+            font-size: clamp(0.75rem, 3vw, 0.85rem);
             font-weight: bold;
             box-shadow: var(--shadow);
             z-index: 10;
-            display: flex; align-items: center; gap: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
             border: 1px solid var(--border);
         }
-        .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--grey); flex-shrink: 0; }
-        .dot.active { background: var(--green); animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(0,230,118,0.5); } 70% { box-shadow: 0 0 0 10px rgba(0,230,118,0); } 100% { box-shadow: 0 0 0 0 rgba(0,230,118,0); } }
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--grey);
+            flex-shrink: 0;
+        }
+        .dot.active {
+            background: var(--green);
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(0, 230, 118, 0.5);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(0, 230, 118, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(0, 230, 118, 0);
+            }
+        }
 
-        /* --- Stops List --- */
+        /* Backup section – same styles as before */
+        .backup-section {
+            margin: 0 16px 16px;
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 16px 16px 14px;
+            border: 2px solid var(--border);
+            box-shadow: var(--shadow);
+        }
+        .backup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .backup-header .title {
+            font-weight: 800;
+            font-size: clamp(0.95rem, 3.5vw, 1.1rem);
+            color: #ffd600;
+        }
+        .backup-status {
+            font-size: 0.75rem;
+            padding: 4px 12px;
+            border-radius: 20px;
+            background: #263238;
+            color: var(--grey);
+            border: 1px solid var(--border);
+            white-space: nowrap;
+        }
+        .backup-status.success {
+            color: var(--green);
+            border-color: var(--green);
+        }
+        .backup-status.error {
+            color: #ff5252;
+            border-color: #ff5252;
+        }
+        .backup-status.syncing {
+            color: #ffd600;
+            border-color: #ffd600;
+            animation: pulseText 1s infinite alternate;
+        }
+        @keyframes pulseText {
+            0% {
+                opacity: 0.6;
+            }
+            100% {
+                opacity: 1;
+            }
+        }
+
+        .backup-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .backup-btn {
+            flex: 1 0 auto;
+            min-width: 80px;
+            padding: 10px 14px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 700;
+            font-size: clamp(0.75rem, 2.5vw, 0.85rem);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: all 0.2s;
+            background: #263238;
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+        }
+        .backup-btn:active {
+            transform: scale(0.95);
+        }
+        .backup-btn.export-btn {
+            background: rgba(255, 214, 0, 0.12);
+            color: #ffd600;
+            border-color: rgba(255, 214, 0, 0.3);
+        }
+        .backup-btn.export-btn:active {
+            background: rgba(255, 214, 0, 0.25);
+        }
+        .backup-btn.import-btn {
+            background: rgba(41, 121, 255, 0.12);
+            color: #82b1ff;
+            border-color: rgba(41, 121, 255, 0.3);
+        }
+        .backup-btn.import-btn:active {
+            background: rgba(41, 121, 255, 0.25);
+        }
+        .backup-btn.cloud-btn {
+            background: rgba(0, 230, 118, 0.10);
+            color: var(--green);
+            border-color: rgba(0, 230, 118, 0.25);
+        }
+        .backup-btn.cloud-btn:active {
+            background: rgba(0, 230, 118, 0.20);
+        }
+        .backup-btn:disabled {
+            opacity: 0.4;
+            pointer-events: none;
+        }
+        #importInput {
+            display: none;
+        }
+
         .list-header-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 0 16px 10px;
         }
-        .list-header { font-weight: 800; font-size: clamp(1rem, 4vw, 1.2rem); color: #ffd600; }
+        .list-header {
+            font-weight: 800;
+            font-size: clamp(1rem, 4vw, 1.2rem);
+            color: #ffd600;
+        }
         .reset-btn-manual {
             background: #263238;
             color: #ff5252;
@@ -180,24 +363,27 @@
             flex-shrink: 0;
         }
 
-        .stops-list { padding: 0 16px; display: flex; flex-direction: column; gap: 14px; }
-        
-        /* Card Styles */
+        .stops-list {
+            padding: 0 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
         .stop-card {
             background: var(--surface);
             border-radius: var(--radius);
             padding: 16px;
             box-shadow: var(--shadow);
             border: 2px solid var(--border);
-            border-left: 10px solid var(--orange); 
+            border-left: 10px solid var(--orange);
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 12px;
             transition: all 0.25s;
         }
-        
-        /* NEXT ACTIVE STOP - Fixed Border Glitch */
+
         .stop-card.active-next {
             border-color: #ffd600;
             border-left: 10px solid #ffd600;
@@ -205,45 +391,74 @@
             animation: cardPulse 3s infinite alternate;
         }
         @keyframes cardPulse {
-            0% { box-shadow: 0 4px 12px rgba(255, 214, 0, 0.1); }
-            100% { box-shadow: 0 4px 20px rgba(255, 214, 0, 0.3); }
+            0% {
+                box-shadow: 0 4px 12px rgba(255, 214, 0, 0.1);
+            }
+            100% {
+                box-shadow: 0 4px 20px rgba(255, 214, 0, 0.3);
+            }
         }
 
-        /* DONE STOP - Fixed Border Glitch & Opacity */
         .stop-card.done {
             border-color: rgba(0, 230, 118, 0.3);
             border-left: 10px solid var(--green);
             background: var(--green-light);
-            /* Removed opacity rule to keep text & buttons clear */
         }
-        
-        .stop-info { flex: 1; display: flex; flex-direction: column; gap: 8px; min-width: 0; /* allows text truncation */ }
-        .stop-name-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; width: 100%; }
-        .stop-name-left { display: flex; align-items: flex-start; gap: 10px; flex: 1; min-width: 0; }
-        
+
+        .stop-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-width: 0;
+        }
+        .stop-name-row {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 10px;
+            width: 100%;
+        }
+        .stop-name-left {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            flex: 1;
+            min-width: 0;
+        }
+
         .stop-badge {
             background: var(--border);
             color: #ffd600;
-            width: 28px; height: 28px;
+            width: 28px;
+            height: 28px;
             border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-weight: 900;
             font-size: 0.9rem;
             flex-shrink: 0;
             margin-top: 2px;
         }
-        .stop-card.done .stop-badge { background: var(--green); color: black; }
-        
-        .stop-name { 
-            font-size: clamp(1.1rem, 4vw, 1.3rem); 
-            font-weight: 800; 
-            color: white; 
-            word-wrap: break-word; 
-            word-break: break-word; 
+        .stop-card.done .stop-badge {
+            background: var(--green);
+            color: black;
+        }
+
+        .stop-name {
+            font-size: clamp(1.1rem, 4vw, 1.3rem);
+            font-weight: 800;
+            color: white;
+            word-wrap: break-word;
+            word-break: break-word;
             line-height: 1.2;
         }
-        .stop-card.done .stop-name { text-decoration: line-through; color: var(--grey); }
-        
+        .stop-card.done .stop-name {
+            text-decoration: line-through;
+            color: var(--grey);
+        }
+
         .stop-details {
             font-size: 0.85rem;
             color: var(--text-secondary);
@@ -259,45 +474,57 @@
             border-radius: 8px;
             font-weight: bold;
         }
-        .stop-card.done .dist-badge { display: none; }
+        .stop-card.done .dist-badge {
+            display: none;
+        }
 
-        /* Large Driver Tap Targets */
         .stop-action-btns {
             display: flex;
             align-items: center;
             gap: 10px;
             flex-shrink: 0;
         }
-        
+
         .call-btn {
-            width: 52px; height: 52px;
+            width: 52px;
+            height: 52px;
             border-radius: 50%;
             background: #37474f;
             border: 1px solid var(--border);
-            display: flex; align-items: center; justify-content: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-size: 1.4rem;
             color: #81d4fa;
             cursor: pointer;
             text-decoration: none;
             flex-shrink: 0;
         }
-        .call-btn:active { background: #455a64; }
+        .call-btn:active {
+            background: #455a64;
+        }
 
         .dir-btn {
-            width: 52px; height: 52px;
+            width: 52px;
+            height: 52px;
             border-radius: 50%;
             background: var(--primary);
-            display: flex; align-items: center; justify-content: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-size: 1.4rem;
             color: white;
             border: none;
             cursor: pointer;
             flex-shrink: 0;
         }
-        .dir-btn:active { background: var(--primary-dark); }
+        .dir-btn:active {
+            background: var(--primary-dark);
+        }
 
         .tick-btn {
-            width: 60px; height: 60px;
+            width: 60px;
+            height: 60px;
             border-radius: 50%;
             background: var(--green);
             color: black;
@@ -305,20 +532,26 @@
             font-weight: 900;
             border: none;
             cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             box-shadow: 0 4px 10px rgba(0, 230, 118, 0.4);
             flex-shrink: 0;
         }
-        .tick-btn:active { transform: scale(0.9); }
-        
+        .tick-btn:active {
+            transform: scale(0.9);
+        }
+
         .already-done-check {
-            width: 50px; height: 50px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.8rem; /* Reduced to avoid overflow */
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
             color: var(--green);
         }
 
-        /* Beautiful Red Trash Button */
         .del-field-btn {
             background: rgba(255, 23, 68, 0.15);
             border: 1px solid rgba(255, 23, 68, 0.4);
@@ -332,81 +565,229 @@
             align-items: center;
             gap: 4px;
             transition: all 0.2s;
-            flex-shrink: 0; /* Ensures it doesn't get crushed by long names */
+            flex-shrink: 0;
         }
-        .del-field-btn:active { background: #ff1744; color: white; }
+        .del-field-btn:active {
+            background: #ff1744;
+            color: white;
+        }
 
-        /* --- FAB Button --- */
         .fab {
             position: fixed;
             bottom: calc(var(--safe-bottom) + 20px);
             right: 20px;
-            width: 65px; height: 65px;
+            width: 65px;
+            height: 65px;
             border-radius: 50%;
             background: #ffd600;
-            color: black; font-size: 2.5rem; font-weight: bold;
-            border: none; box-shadow: 0 6px 18px rgba(255,214,0,0.4);
-            z-index: 500; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
+            color: black;
+            font-size: 2.5rem;
+            font-weight: bold;
+            border: none;
+            box-shadow: 0 6px 18px rgba(255, 214, 0, 0.4);
+            z-index: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        .fab:active { transform: scale(0.9); }
+        .fab:active {
+            transform: scale(0.9);
+        }
 
-        /* --- Modal --- */
         .modal-overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.85);
-            z-index: 99999; 
-            display: none; align-items: flex-end; justify-content: center;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 99999;
+            display: none;
+            align-items: flex-end;
+            justify-content: center;
         }
         .modal-sheet {
-            background: var(--surface); width: 100%; max-width: 600px;
-            border-radius: 30px 30px 0 0; padding: 24px 20px calc(var(--safe-bottom) + 24px);
+            background: var(--surface);
+            width: 100%;
+            max-width: 600px;
+            border-radius: 30px 30px 0 0;
+            padding: 24px 20px calc(var(--safe-bottom) + 24px);
             animation: slideUp 0.3s ease-out forwards;
             border-top: 4px solid var(--primary);
             max-height: 90vh;
             overflow-y: auto;
         }
-        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-        
-        .modal-title { font-size: 1.4rem; margin-bottom: 20px; color: #ffd600; font-weight: 800; text-align: center;}
-        .form-group { margin-bottom: 18px; }
-        .form-group label { display: block; font-size: 0.9rem; font-weight: bold; color: var(--text-secondary); margin-bottom: 8px; }
+        @keyframes slideUp {
+            from {
+                transform: translateY(100%);
+            }
+            to {
+                transform: translateY(0);
+            }
+        }
+
+        .modal-title {
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            color: #ffd600;
+            font-weight: 800;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 18px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
         .form-input {
-            width: 100%; padding: 14px 16px; border-radius: 14px;
-            border: 2px solid var(--border); font-size: 1.1rem; outline: none;
-            background: #263238; color: white;
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: 14px;
+            border: 2px solid var(--border);
+            font-size: 1.1rem;
+            outline: none;
+            background: #263238;
+            color: white;
             font-family: inherit;
         }
-        .form-input:focus { border-color: var(--primary); }
-        
-        .fetch-btn {
-            width: 100%; padding: 16px; border-radius: 14px;
-            background: rgba(41, 121, 255, 0.15); color: #82b1ff; border: 2px dashed var(--primary);
-            font-size: 1.1rem; font-weight: bold; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; gap: 10px;
+        .form-input:focus {
+            border-color: var(--primary);
         }
-        .fetch-btn.success { background: var(--green-light); border-color: var(--green); color: var(--green); border-style: solid; }
-        
-        .modal-actions { display: flex; gap: 14px; margin-top: 28px; }
-        .btn-cancel { background: #37474f; color: white; flex: 1; padding: 16px; border-radius: 14px; border: none; font-weight: bold; font-size: 1.1rem; cursor: pointer; }
-        .btn-save { background: var(--primary); color: white; flex: 2; padding: 16px; border-radius: 14px; border: none; font-weight: bold; font-size: 1.1rem; cursor: pointer; }
 
-        /* --- Toast --- */
+        .fetch-btn {
+            width: 100%;
+            padding: 16px;
+            border-radius: 14px;
+            background: rgba(41, 121, 255, 0.15);
+            color: #82b1ff;
+            border: 2px dashed var(--primary);
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .fetch-btn.success {
+            background: var(--green-light);
+            border-color: var(--green);
+            color: var(--green);
+            border-style: solid;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 14px;
+            margin-top: 28px;
+        }
+        .btn-cancel {
+            background: #37474f;
+            color: white;
+            flex: 1;
+            padding: 16px;
+            border-radius: 14px;
+            border: none;
+            font-weight: bold;
+            font-size: 1.1rem;
+            cursor: pointer;
+        }
+        .btn-save {
+            background: var(--primary);
+            color: white;
+            flex: 2;
+            padding: 16px;
+            border-radius: 14px;
+            border: none;
+            font-weight: bold;
+            font-size: 1.1rem;
+            cursor: pointer;
+        }
+
         .toast {
-            position: fixed; top: 24px; left: 50%; transform: translateX(-50%);
-            background: #ffd600; color: black; padding: 14px 28px;
-            border-radius: 30px; font-size: 1rem; z-index: 100000;
-            font-weight: 800; box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-            animation: fadeInOut 2.8s forwards; pointer-events: none;
-            display: flex; align-items: center; gap: 8px;
+            position: fixed;
+            top: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ffd600;
+            color: black;
+            padding: 14px 28px;
+            border-radius: 30px;
+            font-size: 1rem;
+            z-index: 100000;
+            font-weight: 800;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            animation: fadeInOut 2.8s forwards;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
             width: max-content;
             max-width: 90vw;
         }
-        @keyframes fadeInOut { 0% { opacity:0; top:0; } 15% { opacity:1; top:24px; } 85% { opacity:1; top:24px; } 100% { opacity:0; top:0; } }
+        .toast.error {
+            background: #ff5252;
+            color: white;
+        }
+        .toast.success {
+            background: var(--green);
+            color: black;
+        }
+        @keyframes fadeInOut {
+            0% {
+                opacity: 0;
+                top: 0;
+            }
+            15% {
+                opacity: 1;
+                top: 24px;
+            }
+            85% {
+                opacity: 1;
+                top: 24px;
+            }
+            100% {
+                opacity: 0;
+                top: 0;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .backup-actions .backup-btn {
+                flex: 1 0 calc(50% - 4px);
+                font-size: 0.7rem;
+                padding: 8px 6px;
+            }
+            .backup-btn .btn-label {
+                display: none;
+            }
+            .backup-btn .btn-icon {
+                font-size: 1.2rem;
+            }
+            .stop-action-btns .call-btn,
+            .stop-action-btns .dir-btn {
+                width: 44px;
+                height: 44px;
+                font-size: 1.2rem;
+            }
+            .stop-action-btns .tick-btn {
+                width: 50px;
+                height: 50px;
+                font-size: 1.5rem;
+            }
+        }
+        @media (min-width: 481px) {
+            .backup-btn .btn-icon {
+                font-size: 1.1rem;
+            }
+        }
     </style>
 </head>
 <body>
 
-    <!-- Header -->
+    <!-- ===== HEADER ===== -->
     <header class="header">
         <div class="logo-area">
             <div class="logo">🏫</div>
@@ -415,19 +796,13 @@
                 <p id="liveDate">दिनांक लोड होत आहे...</p>
             </div>
         </div>
-        
-        <!-- Morning / Afternoon Shift Toggle -->
         <div class="shift-toggle">
-            <button class="shift-btn active" id="btnMorning" onclick="setShift('morning')">
-                ☀️ सकाळ
-            </button>
-            <button class="shift-btn" id="btnAfternoon" onclick="setShift('afternoon')">
-                🌙 दुपार
-            </button>
+            <button class="shift-btn active" id="btnMorning" onclick="setShift('morning')">☀️ सकाळ</button>
+            <button class="shift-btn" id="btnAfternoon" onclick="setShift('afternoon')">🌙 दुपार</button>
         </div>
     </header>
 
-    <!-- Summary Display -->
+    <!-- ===== SUMMARY ===== -->
     <div class="summary-row">
         <div class="summary-card total">
             <div class="value" id="countTotal">0</div>
@@ -443,7 +818,7 @@
         </div>
     </div>
 
-    <!-- Map -->
+    <!-- ===== MAP ===== -->
     <div class="map-container">
         <div id="map"></div>
         <div class="map-overlay-btns">
@@ -456,35 +831,48 @@
         </div>
     </div>
 
-    <!-- Stops List Header -->
+    <!-- ===== BACKUP & RESTORE (with Firebase integration) ===== -->
+    <div class="backup-section" id="backupSection">
+        <div class="backup-header">
+            <span class="title">📦 डेटा व्यवस्थापन</span>
+            <span class="backup-status" id="backupStatus">✅ सर्व व्यवस्थित</span>
+        </div>
+        <div class="backup-actions">
+            <button class="backup-btn export-btn" onclick="exportBackup()">
+                <span class="btn-icon">📤</span><span class="btn-label">बॅकअप घ्या</span>
+            </button>
+            <button class="backup-btn import-btn" onclick="document.getElementById('importInput').click()">
+                <span class="btn-icon">📥</span><span class="btn-label">बॅकअप आणा</span>
+            </button>
+            <button class="backup-btn cloud-btn" id="cloudUploadBtn" onclick="uploadToBackend()">
+                <span class="btn-icon">☁️</span><span class="btn-label">क्लाउडवर पाठवा</span>
+            </button>
+            <input type="file" id="importInput" accept=".json" onchange="importBackup(event)">
+        </div>
+    </div>
+
+    <!-- ===== STOPS LIST ===== -->
     <div class="list-header-row">
         <div class="list-header" id="listTitleLabel">सकाळचे थांबे (घरून शाळा):</div>
         <button class="reset-btn-manual" onclick="confirmManualReset()">🔄 रीसेट करा</button>
     </div>
-    
-    <!-- Stops List -->
-    <div class="stops-list" id="stopsList">
-        <!-- JS Driven Content -->
-    </div>
+    <div class="stops-list" id="stopsList"></div>
 
-    <!-- Add Stop Button (FAB) -->
+    <!-- ===== FAB ===== -->
     <button class="fab" onclick="openModal()" title="नवीन थांबा जोडा">+</button>
 
-    <!-- Add Stop Modal -->
+    <!-- ===== MODAL ===== -->
     <div class="modal-overlay" id="addModal">
         <div class="modal-sheet">
             <h2 class="modal-title">नवीन थांबा जोडा 📍</h2>
-            
             <div class="form-group">
                 <label>विद्यार्थ्यांचे / थांब्याचे नाव लिहा *</label>
                 <input type="text" id="stopNameInput" class="form-input" placeholder="उदा. राहुल शिंदे, पिंपरी" required>
             </div>
-
             <div class="form-group">
                 <label>पालकांचा मोबाईल नंबर (ऐच्छिक)</label>
                 <input type="tel" id="stopPhoneInput" class="form-input" placeholder="उदा. 98XXXXXXXX">
             </div>
-
             <div class="form-group">
                 <label>थांब्याची जागा (Location) सेट करा</label>
                 <p style="font-size: 0.8rem; color: var(--grey); margin-bottom: 8px;">
@@ -494,7 +882,6 @@
                     📍 माझी चालू जागा इथेच सेट करा
                 </button>
             </div>
-
             <div class="modal-actions">
                 <button type="button" class="btn-cancel" onclick="closeModal()">मागे होई</button>
                 <button type="button" class="btn-save" onclick="saveNewStop()">✅ थांबा सेव्ह करा</button>
@@ -502,31 +889,70 @@
         </div>
     </div>
 
-    <!-- Leaflet JS -->
+    <!-- ===== LEaFLET JS ===== -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
+    <!-- ============================================================== -->
+    <!--  FIREBASE SDK (compat) – added for backend integration          -->
+    <!-- ============================================================== -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js">
+    </script>
+
     <script>
-        // --- State Management ---
+        // ================================================================
+        //  FIREBASE INITIALIZATION (using the config provided)
+        // ================================================================
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyD9RuHVEVYey9YaRDJVDOo5A6iZxolHP2U",
+            authDomain: "busroute-859b9.firebaseapp.com",
+            projectId: "busroute-859b9",
+            storageBucket: "busroute-859b9.firebasestorage.app",
+            messagingSenderId: "244090789044",
+            appId: "1:244090789044:web:df984f47e7445f114f0be1",
+            measurementId: "G-T1XWZH79G3"
+        };
+
+        let firebaseApp = null;
+        let firestore = null;
+        let firebaseInitialized = false;
+
+        try {
+            firebaseApp = firebase.initializeApp(firebaseConfig);
+            firestore = firebase.firestore();
+            // Enable offline persistence so the app works even when offline
+            firestore.enablePersistence({ synchronizeTabs: true })
+                .catch(function(err) {
+                    console.warn('Firestore persistence error (non-critical):', err);
+                });
+            firebaseInitialized = true;
+            console.log('Firebase initialized successfully.');
+        } catch (e) {
+            console.error('Firebase initialization failed:', e);
+            firebaseInitialized = false;
+        }
+
+        // ================================================================
+        //  EXISTING STATE & BUSINESS LOGIC (unchanged)
+        // ================================================================
+
         const STATE = {
             stops: [],
-            driverPos: null,      
-            tempCoords: null,     
-            currentShift: 'morning', 
+            driverPos: null,
+            tempCoords: null,
+            currentShift: 'morning',
             map: null,
             markerLayer: null,
             driverMarker: null,
             routeLine: null
         };
 
-        // --- Init & Auto Daily Reset ---
         function initApp() {
             const saved = localStorage.getItem('schoolBusStopsData');
             if (saved) {
-                try {
-                    STATE.stops = JSON.parse(saved);
-                } catch (e) {
-                    STATE.stops = [];
-                }
+                try { STATE.stops = JSON.parse(saved); } catch (e) { STATE.stops = []; }
             }
 
             const savedShift = localStorage.getItem('schoolBusShift');
@@ -536,20 +962,22 @@
             }
 
             const now = new Date();
-            const dateStr = now.toLocaleDateString('mr-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+            const dateStr = now.toLocaleDateString('mr-IN', { weekday: 'long', day: 'numeric', month: 'long',
+                    year: 'numeric' });
             document.getElementById('liveDate').textContent = dateStr;
 
             checkDailyReset();
             initMap();
             startGPS();
             updateUI();
+
+            // Run migration (auto-upload to Firebase if not yet done)
+            runMigration();
         }
 
-        // Auto Midnight Reset
         function checkDailyReset() {
-            const todayKey = new Date().toDateString(); 
+            const todayKey = new Date().toDateString();
             const lastSavedDate = localStorage.getItem('lastOpenedDate');
-
             if (lastSavedDate && lastSavedDate !== todayKey) {
                 if (STATE.stops.length > 0) {
                     STATE.stops.forEach(stop => { stop.status = 'pending'; });
@@ -560,19 +988,15 @@
             localStorage.setItem('lastOpenedDate', todayKey);
         }
 
-        // Manual Clear/Reset
         function confirmManualReset() {
             if (confirm("तुम्हाला आजचे सर्व थांबे पुन्हा सुरूवातीपासून (Pending) करायचे आहेत का?")) {
-                STATE.stops.forEach(stop => {
-                    stop.status = 'pending';
-                });
+                STATE.stops.forEach(stop => { stop.status = 'pending'; });
                 saveData();
                 updateUI();
                 showToast("🔄 सर्व थांबे यशस्वीरित्या रीसेट झाले!");
             }
         }
 
-        // Shift Configuration Switch
         function setShift(shiftMode) {
             STATE.currentShift = shiftMode;
             localStorage.setItem('schoolBusShift', shiftMode);
@@ -585,7 +1009,6 @@
             const morningBtn = document.getElementById('btnMorning');
             const afternoonBtn = document.getElementById('btnAfternoon');
             const label = document.getElementById('listTitleLabel');
-
             if (shiftMode === 'morning') {
                 morningBtn.classList.add('active');
                 afternoonBtn.classList.remove('active');
@@ -599,7 +1022,8 @@
 
         // --- Map Logic ---
         function initMap() {
-            STATE.map = L.map('map', { zoomControl: false, attributionControl: false }).setView([18.6279, 73.8009], 13);
+            STATE.map = L.map('map', { zoomControl: false, attributionControl: false }).setView([18.6279, 73.8009],
+            13);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(STATE.map);
             STATE.markerLayer = L.layerGroup().addTo(STATE.map);
         }
@@ -613,41 +1037,44 @@
             }
 
             const points = [];
-
             if (STATE.driverPos) {
                 points.push([STATE.driverPos.lat, STATE.driverPos.lng]);
                 L.circle([STATE.driverPos.lat, STATE.driverPos.lng], {
-                    radius: 30, color: '#2979ff', fillColor: '#2979ff', fillOpacity: 0.2, weight: 1
+                    radius: 30,
+                    color: '#2979ff',
+                    fillColor: '#2979ff',
+                    fillOpacity: 0.2,
+                    weight: 1
                 }).addTo(STATE.markerLayer);
-
                 STATE.driverMarker = L.circleMarker([STATE.driverPos.lat, STATE.driverPos.lng], {
-                    radius: 9, color: 'white', weight: 3, fillColor: '#2979ff', fillOpacity: 1
+                    radius: 9,
+                    color: 'white',
+                    weight: 3,
+                    fillColor: '#2979ff',
+                    fillOpacity: 1
                 }).addTo(STATE.markerLayer);
             }
 
             const displayStops = [...STATE.stops];
-            if (STATE.currentShift === 'afternoon') {
-                displayStops.reverse();
-            }
+            if (STATE.currentShift === 'afternoon') displayStops.reverse();
 
             displayStops.forEach((stop, i) => {
                 const isDone = stop.status === 'completed';
-                const color = isDone ? '#9aa0a6' : (i === getNextPendingIndex(displayStops) ? '#ffd600' : '#ff9100');
-                
-                const iconHtml = `<div style="background:${color};color:black;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;border:2px solid white;box-shadow:0 3px 6px rgba(0,0,0,0.4);font-size:0.9rem">${i+1}</div>`;
-                const icon = L.divIcon({ className: '', html: iconHtml, iconSize: [30,30], iconAnchor: [15,15] });
-                
+                const color = isDone ? '#9aa0a6' : (i === getNextPendingIndex(displayStops) ? '#ffd600' :
+                '#ff9100');
+                const iconHtml =
+                    `<div style="background:${color};color:black;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;border:2px solid white;box-shadow:0 3px 6px rgba(0,0,0,0.4);font-size:0.9rem">${i+1}</div>`;
+                const icon = L.divIcon({ className: '', html: iconHtml, iconSize: [30, 30], iconAnchor: [15,
+                    15] });
                 L.marker([stop.coords.lat, stop.coords.lng], { icon: icon })
-                 .addTo(STATE.markerLayer)
-                 .bindPopup(`<b>${stop.name}</b><br>${isDone ? 'झाला ✔' : 'बाकी ⏳'}`);
-
-                if (!isDone) {
-                    points.push([stop.coords.lat, stop.coords.lng]);
-                }
+                    .addTo(STATE.markerLayer)
+                    .bindPopup(`<b>${stop.name}</b><br>${isDone ? 'झाला ✔' : 'बाकी ⏳'}`);
+                if (!isDone) points.push([stop.coords.lat, stop.coords.lng]);
             });
 
             if (points.length > 1) {
-                STATE.routeLine = L.polyline(points, { color: '#ffd600', weight: 5, dashArray: '8, 8', opacity: 0.8 }).addTo(STATE.map);
+                STATE.routeLine = L.polyline(points, { color: '#ffd600', weight: 5, dashArray: '8, 8',
+                        opacity: 0.8 }).addTo(STATE.map);
             }
         }
 
@@ -666,21 +1093,19 @@
         function zoomToAll() {
             if (!STATE.map || STATE.stops.length === 0) return;
             const bounds = [];
-            if(STATE.driverPos) bounds.push([STATE.driverPos.lat, STATE.driverPos.lng]);
+            if (STATE.driverPos) bounds.push([STATE.driverPos.lat, STATE.driverPos.lng]);
             STATE.stops.forEach(s => bounds.push([s.coords.lat, s.coords.lng]));
-            if(bounds.length > 0) STATE.map.fitBounds(bounds, { padding: [40, 40] });
+            if (bounds.length > 0) STATE.map.fitBounds(bounds, { padding: [40, 40] });
         }
 
         // --- GPS Watcher ---
         function startGPS() {
             const ind = document.getElementById('gpsIndicator');
             const txt = document.getElementById('gpsText');
-
             if (!navigator.geolocation) {
                 txt.textContent = "मोबाईलमध्ये GPS सपोर्ट नाही.";
                 return;
             }
-
             navigator.geolocation.watchPosition(
                 (pos) => {
                     STATE.driverPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
@@ -694,18 +1119,17 @@
                     let errorMsg = "GPS बंद आहे! कृपया Location चालू करा 🔴";
                     if (err.code === 1) errorMsg = "GPS परमिशन नाकारली! Location चालू करा 🔴";
                     txt.textContent = errorMsg;
-                },
-                { enableHighAccuracy: true, maximumAge: 3000, timeout: 15000 }
+                }, { enableHighAccuracy: true, maximumAge: 3000, timeout: 15000 }
             );
         }
 
         function calcDist(lat1, lon1, lat2, lon2) {
-            const R = 6371; 
+            const R = 6371;
             const dLat = (lat2 - lat1) * Math.PI / 180;
             const dLon = (lon2 - lon1) * Math.PI / 180;
-            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
             const d = R * c;
             return d < 1 ? Math.round(d * 1000) + ' मी' : d.toFixed(1) + ' किमी';
         }
@@ -714,45 +1138,37 @@
         function updateUI() {
             const total = STATE.stops.length;
             const done = STATE.stops.filter(s => s.status === 'completed').length;
-            
             document.getElementById('countTotal').textContent = total;
             document.getElementById('countDone').textContent = done;
             document.getElementById('countLeft').textContent = total - done;
 
             const listDiv = document.getElementById('stopsList');
             listDiv.innerHTML = '';
-
             if (total === 0) {
-                listDiv.innerHTML = `
-                    <div style="text-align:center; padding: 40px 20px; color: var(--grey); background: var(--surface); border-radius: var(--radius); border: 2px dashed var(--border);">
+                listDiv.innerHTML =
+                    `<div style="text-align:center; padding: 40px 20px; color: var(--grey); background: var(--surface); border-radius: var(--radius); border: 2px dashed var(--border);">
                         <p style="font-size: 1.2rem; font-weight: bold; margin-bottom: 8px;">एकूण शून्य थांबे</p>
                         <p style="font-size: 0.9rem;">नवीन थांबा जोडण्यासाठी खालील पिवळे (+) बटण दाबा.</p>
-                    </div>
-                `;
+                    </div>`;
                 updateMapElements();
                 return;
             }
 
             const displayStops = [...STATE.stops];
-            if (STATE.currentShift === 'afternoon') {
-                displayStops.reverse();
-            }
+            if (STATE.currentShift === 'afternoon') displayStops.reverse();
 
             const nextPendingIndex = getNextPendingIndex(displayStops);
 
             displayStops.forEach((stop, index) => {
                 const isDone = stop.status === 'completed';
-                const isNext = (index === nextPendingIndex); 
-                
-                const distStr = (STATE.driverPos && !isDone) ? 
-                    calcDist(STATE.driverPos.lat, STATE.driverPos.lng, stop.coords.lat, stop.coords.lng) : '--';
-                
+                const isNext = (index === nextPendingIndex);
+                const distStr = (STATE.driverPos && !isDone) ?
+                    calcDist(STATE.driverPos.lat, STATE.driverPos.lng, stop.coords.lat, stop.coords.lng) :
+                    '--';
                 const card = document.createElement('div');
                 card.className = `stop-card ${isDone ? 'done' : ''} ${isNext ? 'active-next' : ''}`;
-                
                 const travelIcon = STATE.currentShift === 'morning' ? '🏠 ➔ 🏫' : '🏫 ➔ 🏠';
 
-                // Core Action Setup
                 let actionBtnHTML = '';
                 if (!isDone) {
                     actionBtnHTML = `
@@ -763,11 +1179,8 @@
                         </div>
                     `;
                 } else {
-                    actionBtnHTML = `
-                        <div class="stop-action-btns">
-                            <div class="already-done-check">✔</div>
-                        </div>
-                    `;
+                    actionBtnHTML =
+                        `<div class="stop-action-btns"><div class="already-done-check">✔</div></div>`;
                 }
 
                 card.innerHTML = `
@@ -777,24 +1190,19 @@
                                 <div class="stop-badge">${index + 1}</div>
                                 <div class="stop-name">${stop.name}</div>
                             </div>
-                            <button class="del-field-btn" onclick="deleteStop('${stop.id}')" title="थांबा काढून टाका">
-                                🗑️ काढा
-                            </button>
+                            <button class="del-field-btn" onclick="deleteStop('${stop.id}')" title="थांबा काढून टाका">🗑️ काढा</button>
                         </div>
                         <div class="stop-details">
                             <span class="dist-badge class-dist" data-lat="${stop.coords.lat}" data-lng="${stop.coords.lng}">
                                 📍 ${distStr} लांब
                             </span>
-                            <span style="color: var(--grey); font-weight: bold; font-size: 0.8rem;">
-                                ${travelIcon}
-                            </span>
+                            <span style="color: var(--grey); font-weight: bold; font-size: 0.8rem;">${travelIcon}</span>
                         </div>
                     </div>
                     ${actionBtnHTML}
                 `;
                 listDiv.appendChild(card);
             });
-
             updateMapElements();
         }
 
@@ -807,9 +1215,9 @@
             });
         }
 
-        // --- Operations ---
         function openNavMap(lat, lng) {
-            window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving`, '_blank');
+            window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving`,
+            '_blank');
         }
 
         function markDone(id) {
@@ -822,7 +1230,6 @@
             }
         }
 
-        // Handler for the Deleting Field Button
         function deleteStop(id) {
             const stop = STATE.stops.find(s => s.id === id);
             const stopName = stop ? stop.name : "हा थांबा";
@@ -834,16 +1241,13 @@
             }
         }
 
-        // --- Modals ---
         function openModal() {
             document.getElementById('stopNameInput').value = '';
             document.getElementById('stopPhoneInput').value = '';
             STATE.tempCoords = null;
-            
             const btn = document.getElementById('btnFetchLocation');
             btn.className = 'fetch-btn';
             btn.innerHTML = '📍 माझी चालू जागा इथेच सेट करा';
-            
             document.getElementById('addModal').style.display = 'flex';
         }
 
@@ -856,32 +1260,19 @@
                 showToast('थांबा! अजून जीपीएस लोकेशन मिळाले नाही.');
                 return;
             }
-            
             STATE.tempCoords = { ...STATE.driverPos };
-            
             const btn = document.getElementById('btnFetchLocation');
             btn.className = 'fetch-btn success';
             btn.innerHTML = '✅ जागा यशस्वीरित्या सेट झाली!';
-            
             showToast('तुम्ही उभे असलेली जागा रेकॉर्ड केली आहे.');
         }
 
         function saveNewStop() {
             const name = document.getElementById('stopNameInput').value.trim();
             const phone = document.getElementById('stopPhoneInput').value.trim();
-            
-            if (!name) {
-                showToast('कृपया विद्यार्थ्याचे किंवा थांब्याचे नाव लिहा!');
-                return;
-            }
-            if (!STATE.tempCoords) {
-                showToast('कृपया "माझी चालू जागा सेट करा" वर क्लिक करा!');
-                return;
-            }
-
-            // Create unique robust ID
+            if (!name) { showToast('कृपया विद्यार्थ्याचे किंवा थांब्याचे नाव लिहा!'); return; }
+            if (!STATE.tempCoords) { showToast('कृपया "माझी चालू जागा सेट करा" वर क्लिक करा!'); return; }
             const uniqueId = Date.now().toString() + Math.random().toString(36).substring(2, 9);
-
             const newStop = {
                 id: uniqueId,
                 name: name,
@@ -889,7 +1280,6 @@
                 coords: STATE.tempCoords,
                 status: 'pending'
             };
-
             STATE.stops.push(newStop);
             saveData();
             updateUI();
@@ -902,20 +1292,326 @@
             localStorage.setItem('schoolBusStopsData', JSON.stringify(STATE.stops));
         }
 
-        function showToast(msg) {
+        // --- Toast ---
+        function showToast(msg, type) {
             const old = document.querySelector('.toast');
             if (old) old.remove();
-            
             const t = document.createElement('div');
             t.className = 'toast';
+            if (type === 'error') t.classList.add('error');
+            if (type === 'success') t.classList.add('success');
             t.innerHTML = `🔔 <span>${msg}</span>`;
             document.body.appendChild(t);
-            
             setTimeout(() => { if (t.parentElement) t.remove(); }, 2800);
         }
+
+        // ================================================================
+        //  BACKUP & RESTORE (Export / Import) – unchanged
+        // ================================================================
+
+        const APP_STORAGE_KEYS = [
+            'schoolBusStopsData',
+            'schoolBusShift',
+            'lastOpenedDate',
+            'schoolBusMigrationCompleted'
+        ];
+
+        function exportBackup() {
+            try {
+                const backupPayload = {
+                    version: '1.0',
+                    exportedAt: new Date().toISOString(),
+                    appName: 'SchoolBusTracker',
+                    data: {}
+                };
+                APP_STORAGE_KEYS.forEach(key => {
+                    const value = localStorage.getItem(key);
+                    if (value !== null) {
+                        try { backupPayload.data[key] = JSON.parse(value); } catch (_) { backupPayload.data[key] =
+                            value; }
+                    }
+                });
+                const jsonStr = JSON.stringify(backupPayload, null, 2);
+                const blob = new Blob([jsonStr], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                const dateStr = new Date().toISOString().slice(0, 10);
+                link.download = `bus_tracker_backup_${dateStr}.json`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+                setBackupStatus('success', '✅ बॅकअप घेतला');
+                showToast('📤 बॅकअप फाईल यशस्वीरित्या डाउनलोड झाली!', 'success');
+            } catch (e) {
+                console.error('Export backup error:', e);
+                setBackupStatus('error', '❌ बॅकअप अयशस्वी');
+                showToast('बॅकअप घेताना त्रुटी आली: ' + e.message, 'error');
+            }
+        }
+
+        function importBackup(event) {
+            const fileInput = event.target;
+            const file = fileInput.files[0];
+            if (!file) return;
+            fileInput.value = '';
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const backupData = JSON.parse(e.target.result);
+                    if (!backupData.data || typeof backupData.data !== 'object') {
+                        throw new Error('Invalid backup file: missing "data" object.');
+                    }
+                    const hasData = Object.keys(backupData.data).some(k => backupData.data[k] !== undefined && backupData
+                        .data[k] !== null);
+                    if (!hasData) {
+                        showToast('⚠️ बॅकअप फाईलमध्ये कोणताही डेटा नाही.', 'error');
+                        return;
+                    }
+                    if (!confirm(
+                            'तुम्ही खात्रीने या बॅकअप फाईलमधून डेटा पुनर्संचयित करू इच्छिता?\n\n⚠️ सध्याचा सर्व डेटा ओव्हरराईट होईल!\n✅ तुमचा जुना डेटा हटणार नाही, तो या नवीन डेटाने बदलला जाईल.'
+                            )) {
+                        showToast('बॅकअप आयात रद्द केली.', 'error');
+                        return;
+                    }
+                    let restoredCount = 0;
+                    APP_STORAGE_KEYS.forEach(key => {
+                        if (backupData.data.hasOwnProperty(key) && backupData.data[key] !== undefined && backupData
+                            .data[key] !== null) {
+                            const value = backupData.data[key];
+                            if (typeof value === 'object') {
+                                localStorage.setItem(key, JSON.stringify(value));
+                            } else {
+                                localStorage.setItem(key, String(value));
+                            }
+                            restoredCount++;
+                        }
+                    });
+                    const restoredStops = localStorage.getItem('schoolBusStopsData');
+                    if (restoredStops) {
+                        try { STATE.stops = JSON.parse(restoredStops); } catch (_) { STATE.stops = []; }
+                    }
+                    const restoredShift = localStorage.getItem('schoolBusShift');
+                    if (restoredShift) {
+                        STATE.currentShift = restoredShift;
+                        setShiftUI(restoredShift);
+                    }
+                    updateUI();
+                    setBackupStatus('success', '✅ बॅकअप पुनर्संचयित');
+                    showToast(`📥 ${restoredCount} आयटम यशस्वीरित्या पुनर्संचयित झाले!`, 'success');
+                } catch (err) {
+                    console.error('Import backup error:', err);
+                    setBackupStatus('error', '❌ आयात अयशस्वी');
+                    showToast('बॅकअप आयात करताना त्रुटी: ' + err.message, 'error');
+                }
+            };
+            reader.onerror = function() {
+                setBackupStatus('error', '❌ फाईल वाचता आली नाही');
+                showToast('फाईल वाचताना त्रुटी आली.', 'error');
+            };
+            reader.readAsText(file);
+        }
+
+        // ================================================================
+        //  FIREBASE UPLOAD FUNCTION (replaces generic BACKEND_CONFIG)
+        // ================================================================
+
+        /**
+         * Upload all stops to Firestore.
+         * - If called without data, uploads the entire current STATE.stops.
+         * - If called with data (for migration), uploads that data.
+         * - Each stop is stored as a document in collection "stops".
+         * - Also stores a meta document "app_meta" with last upload time and count.
+         * - Handles offline errors gracefully.
+         */
+        function uploadToBackend(dataToSend, callback) {
+            const btn = document.getElementById('cloudUploadBtn');
+            const originalHTML = btn.innerHTML;
+
+            // Check Firebase availability
+            if (!firebaseInitialized) {
+                showToast('⚠️ Firebase उपलब्ध नाही. कृपया इंटरनेट कनेक्शन तपासा.', 'error');
+                setBackupStatus('error', '❌ Firebase नाही');
+                if (callback) callback(false);
+                return Promise.reject(new Error('Firebase not initialized'));
+            }
+
+            // Determine what to upload
+            let stopsToUpload;
+            if (dataToSend && Array.isArray(dataToSend)) {
+                stopsToUpload = dataToSend; // called from migration with stops array
+            } else if (dataToSend && dataToSend.stops) {
+                stopsToUpload = dataToSend.stops;
+            } else {
+                stopsToUpload = STATE.stops; // manual upload
+            }
+
+            if (!stopsToUpload || stopsToUpload.length === 0) {
+                showToast('📭 अपलोड करण्यासाठी कोणतेही थांबे नाहीत.', 'error');
+                if (callback) callback(false);
+                return Promise.reject(new Error('No stops to upload'));
+            }
+
+            // Update UI
+            setBackupStatus('syncing', '⏳ अपलोड करत आहे...');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="btn-icon">⏳</span><span class="btn-label">अपलोड...</span>';
+
+            // Prepare batch writes (max 500 per batch)
+            const batchSize = 500;
+            const batches = [];
+            for (let i = 0; i < stopsToUpload.length; i += batchSize) {
+                const chunk = stopsToUpload.slice(i, i + batchSize);
+                batches.push(chunk);
+            }
+
+            // We'll upload each batch sequentially using Promise chaining
+            let uploadPromises = [];
+            let uploadedCount = 0;
+
+            // Helper to upload a single batch
+            function uploadBatch(batchStops, batchIndex) {
+                return new Promise((resolve, reject) => {
+                    const batch = firestore.batch();
+                    const collectionRef = firestore.collection('stops');
+
+                    batchStops.forEach(stop => {
+                        // Use stop.id as document ID to avoid duplicates
+                        const docRef = collectionRef.doc(stop.id);
+                        // Prepare data (convert coords to GeoPoint for Firestore)
+                        const data = {
+                            name: stop.name,
+                            phone: stop.phone || '',
+                            status: stop.status,
+                            lat: stop.coords.lat,
+                            lng: stop.coords.lng,
+                            // Store as GeoPoint if needed, but we keep lat/lng for flexibility
+                            // Also store timestamp
+                            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                        };
+                        batch.set(docRef, data, { merge: true });
+                    });
+
+                    // Also update a meta document with total count
+                    const metaRef = firestore.collection('app_meta').doc('upload_status');
+                    batch.set(metaRef, {
+                        lastUploadTime: firebase.firestore.FieldValue.serverTimestamp(),
+                        totalStops: stopsToUpload.length,
+                        uploadedStops: firebase.firestore.FieldValue.increment(batchStops.length)
+                    }, { merge: true });
+
+                    batch.commit()
+                        .then(() => {
+                            uploadedCount += batchStops.length;
+                            resolve();
+                        })
+                        .catch(err => {
+                            reject(err);
+                        });
+                });
+            }
+
+            // Execute batches sequentially
+            let promiseChain = Promise.resolve();
+            batches.forEach((chunk, idx) => {
+                promiseChain = promiseChain.then(() => uploadBatch(chunk, idx));
+            });
+
+            return promiseChain
+                .then(() => {
+                    // Success
+                    setBackupStatus('success', `✅ ${uploadedCount} थांबे अपलोड`);
+                    showToast(`☁️ ${uploadedCount} थांबे यशस्वीरित्या क्लाउडवर पाठवले गेले!`, 'success');
+                    if (callback) callback(true, { uploaded: uploadedCount });
+                    btn.disabled = false;
+                    btn.innerHTML = originalHTML;
+                    return { uploaded: uploadedCount };
+                })
+                .catch(err => {
+                    console.error('Upload error:', err);
+                    setBackupStatus('error', '❌ अपलोड अयशस्वी');
+                    let msg = 'क्लाउडवर पाठवताना त्रुटी. ';
+                    if (err.message) msg += err.message;
+                    else msg += 'कृपया इंटरनेट कनेक्शन तपासा.';
+                    showToast('⚠️ ' + msg, 'error');
+                    if (callback) callback(false, err);
+                    btn.disabled = false;
+                    btn.innerHTML = originalHTML;
+                    throw err;
+                });
+        }
+
+        // ================================================================
+        //  MIGRATION SYSTEM – now uses Firebase
+        // ================================================================
+
+        const MIGRATION_KEY = 'schoolBusMigrationCompleted';
+
+        function runMigration() {
+            const migrationDone = localStorage.getItem(MIGRATION_KEY);
+            if (migrationDone === 'true') {
+                setBackupStatus('success', '✅ सर्व व्यवस्थित');
+                return;
+            }
+
+            const stopsData = localStorage.getItem('schoolBusStopsData');
+            if (!stopsData) {
+                localStorage.setItem(MIGRATION_KEY, 'true');
+                setBackupStatus('success', '✅ सर्व व्यवस्थित');
+                return;
+            }
+
+            let stops;
+            try { stops = JSON.parse(stopsData); } catch (_) { stops = []; }
+            if (!Array.isArray(stops) || stops.length === 0) {
+                localStorage.setItem(MIGRATION_KEY, 'true');
+                setBackupStatus('success', '✅ सर्व व्यवस्थित');
+                return;
+            }
+
+            // Data exists and migration not done – attempt upload
+            setBackupStatus('syncing', '⏳ मायग्रेशन चालू आहे...');
+            console.log(`🔄 Migration: uploading ${stops.length} stops to Firebase...`);
+
+            // Check Firebase availability
+            if (!firebaseInitialized) {
+                setBackupStatus('error', '⚠️ Firebase नाही, पुन्हा प्रयत्न करा');
+                console.warn('Migration: Firebase not available. Will retry.');
+                return;
+            }
+
+            // Upload the stops via the same function
+            uploadToBackend(stops, (success, result) => {
+                if (success) {
+                    localStorage.setItem(MIGRATION_KEY, 'true');
+                    setBackupStatus('success', '✅ मायग्रेशन पूर्ण');
+                    showToast(`✅ ${stops.length} थांबे क्लाउडवर बॅकअप झाले!`, 'success');
+                    console.log('✅ Migration completed successfully.');
+                } else {
+                    setBackupStatus('error', '⚠️ मायग्रेशन अयशस्वी, पुन्हा प्रयत्न करा');
+                    console.warn('Migration failed. Will retry on next launch.');
+                    // Do not set MIGRATION_KEY – retry next time
+                }
+            });
+        }
+
+        // Helper to update the backup status badge
+        function setBackupStatus(type, message) {
+            const el = document.getElementById('backupStatus');
+            if (!el) return;
+            el.className = 'backup-status';
+            if (type === 'success') el.classList.add('success');
+            else if (type === 'error') el.classList.add('error');
+            else if (type === 'syncing') el.classList.add('syncing');
+            el.textContent = message;
+        }
+
+        // ================================================================
+        //  BOOT
+        // ================================================================
 
         document.addEventListener('DOMContentLoaded', initApp);
     </script>
 </body>
 </html>
-
